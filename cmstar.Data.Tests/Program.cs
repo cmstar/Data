@@ -12,6 +12,6 @@ namespace cmstar.Data.Tests
     {
         static void Main(string[] args)
         {
-		}
+        }
     }
 }
