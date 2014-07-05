@@ -46,7 +46,6 @@
     <Compile Include="ArgAssert.cs" />
     <Compile Include="Data\AbstractDbClient.cs" />
     <Compile Include="Data\DataExpiredException.cs" />
-    <Compile Include="Data\Db.cs" />
     <Compile Include="Data\DbClientParamEx.cs" />
     <Compile Include="Data\Dynamic\CommandCacheItem.cs" />
     <Compile Include="Data\Dynamic\CommandCache.cs" />
