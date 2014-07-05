@@ -181,7 +181,7 @@ namespace cmstar.Data.Dynamic
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例的集合。若查询命中的行数为0，返回空集合。</returns>
-        public static IEnumerable<T> List<T>(this IDbClient client,
+        public static IList<T> List<T>(this IDbClient client,
             IMapper<T> mapper, string sql, object param,
             CommandType commandType = CommandType.Text, int timeOut = 0)
         {
