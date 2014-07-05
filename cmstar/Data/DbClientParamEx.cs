@@ -9,36 +9,18 @@ namespace cmstar.Data
     public static class DbClientParamEx
     {
         /// <summary>
-        /// 创建一直SQL参数实例，并指定参数的有关信息。
+        /// 创建一个SQL参数实例，并指定参数的有关信息。
         /// </summary>
         /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="name">参数的名称。</param>
         /// <param name="dbType">参数的数据类型。</param>
         /// <param name="value">参数的值。</param>
-        /// <returns><see cref="DbParameter"/>的实例。</returns>
-        public static DbParameter CreateParameter(this IDbClient client,
-            string name, DbType dbType, object value = null)
-        {
-            var p = client.CreateParameter();
-
-            p.ParameterName = name;
-            p.DbType = dbType;
-            p.Value = value;
-
-            return p;
-        }
-
-        /// <summary>
-        /// 创建一直SQL参数实例，并指定参数的有关信息。
-        /// </summary>
-        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
-        /// <param name="name">参数的名称。</param>
-        /// <param name="dbType">参数的数据类型。</param>
         /// <param name="size">参数的大小。</param>
-        /// <param name="value">参数的值。</param>
+        /// <param name="direction">参数的输入、输出类型。</param>
         /// <returns><see cref="DbParameter"/>的实例。</returns>
         public static DbParameter CreateParameter(this IDbClient client,
-            string name, DbType dbType, int size, object value = null)
+            string name, DbType dbType, object value = null, int size = 0, 
+            ParameterDirection direction = ParameterDirection.Input)
         {
             var p = client.CreateParameter();
 
