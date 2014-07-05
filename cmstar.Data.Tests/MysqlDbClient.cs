@@ -1,7 +1,6 @@
-﻿using cmstar.Data;
-using System.Data.Common;
+﻿using System.Data.Common;
 
-namespace cmstar.DalSupport.Tests
+namespace cmstar.Data
 {
     /// <summary>
     /// Mysql数据库访问客户端。
