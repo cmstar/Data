@@ -118,7 +118,7 @@ namespace cmstar.Data
         public DataTable DataTable(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeOut = 0)
         {
-            return DataSet(sql, null, commandType, timeOut).Tables[0];
+            return DataSet(sql, parameters, commandType, timeOut).Tables[0];
         }
 
         /// <summary>
