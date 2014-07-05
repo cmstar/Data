@@ -9,11 +9,15 @@
 
     public static class Db
     {
-        private static readonly Dictionary<string, IDbClient> KnownClients = new Dictionary<string, IDbClient>();
+        private static readonly Dictionary<string, IDbClient> KnownClients
+            = new Dictionary<string, IDbClient>();
 
         public static IDbClient Northwind
         {
-            get { return GetClient("Northwind", "server=.;database=Northwind;trusted_connection=true;"); }
+            get 
+            {
+                return GetClient("Northwind", "server=.;database=Northwind;trusted_connection=true;");
+            }
         }
 
         private static IDbClient GetClient(string name, string connectionString)
@@ -40,7 +44,7 @@
 
 ### 访问其他数据库
 
-如果要访问MySql，可以用几行代码实现一个面向MySql的IDbClient实现。下面以使用 MySql.Data.dll 作为MySql .net客户端提供器为例。
+如果要访问MySql，可以用几行代码实现一个面向MySql的`IDbClient`实现。下面以使用 MySql.Data.dll 作为MySql .net客户端提供器为例。
 
     /// <summary>
     /// Mysql数据库访问客户端。
@@ -87,22 +91,29 @@
 ### 基础CRUD
 
     // 查询
-    string productName = (string)Db.Northwind.Scalar("SELECT ProductName FROM Products WHERE ProductID=115");
+    string productName = (string)Db.Northwind.Scalar(
+        "SELECT ProductName FROM Products WHERE ProductID=115");
+    
     DataTable productTable = Db.Northwind.DataTable("SELECT * FROM Products");
 
     // 更新
-    int affectedRows = Db.Northwind.Execute("UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
+    int affectedRows = Db.Northwind.Execute(
+        "UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
 
     // 在没有命中一行的时候抛出异常
     int expectedSize = 1;
-    Db.Northwind.SizedExecute(expectedSize, "UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
+    Db.Northwind.SizedExecute(
+        expectedSize, "UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
 
     // 获取一样
-    IDataRecord record = Db.Northwind.GetRow("SELECT ProductName, SupplierID FROM Products WHERE ProductID=115");
+    IDataRecord record = Db.Northwind.GetRow(
+        "SELECT ProductName, SupplierID FROM Products WHERE ProductID=115");
+
     int supplierId = Convert.ToInt32(record["SupplierID"]);
 
     // 在不用在意资源释放的情况下使用DataReader，利用了foreach的机制，在循环结束后DataReader会自动关闭
-    IEnumerable<IDataRecord> rows = Db.Northwind.Rows("SELECT ProductName, SupplierID FROM Products WHERE ProductID=115");
+    IEnumerable<IDataRecord> rows = Db.Northwind.Rows(
+        "SELECT ProductName, SupplierID FROM Products WHERE ProductID=115");
     foreach (IDataRecord row in rows)
     {
         Console.WriteLine(row["ProductName"]);
@@ -116,8 +127,10 @@
     parameter.ParameterName = "CustomerID";
     parameter.Value = "ALFKI";
     parameter.Direction = ParameterDirection.Input;
+    
     // 调用存储过程 CustOrderHist @CustomerID
-    DataSet ds = Db.Northwind.DataSet("CustOrderHist", new[] { parameter }, CommandType.StoredProcedure);
+    DataSet ds = Db.Northwind.DataSet(
+        "CustOrderHist", new[] { parameter }, CommandType.StoredProcedure);
 
     // 使用DbClientParamEx中的扩展方法快速创建参数（需要using Data命名空间）
     DbParameter[] parameters = new[] 
@@ -151,7 +164,8 @@
 利用上面的`ProductMapper`，我们可以直接从查询中创建`Product`实例了。
 
     // 获取一个实例
-    Product product = Db.Northwind.Get(new ProductMapper(), "SELECT * FROM Products WHERE ProductID=115");
+    Product product = Db.Northwind.Get(
+        new ProductMapper(), "SELECT * FROM Products WHERE ProductID=115");
 
     // 获取实例的集合
     IList<Product> products = Db.Northwind.List(new ProductMapper(), "SELECT * FROM Products");
@@ -159,15 +173,21 @@
 `Mappers`类中已经定义了部分简单类型的Mapper实现，以便实现便捷的查询。
 
 	// 使用已定义好的简单Mapper
-	IList<string> productNames = Db.Northwind.List(Mappers.String(), "SELECT ProductName FROM Products");
-	IList<int> productIds = Db.Northwind.List(Mappers.Int32(), "SELECT ProductID FROM Products");
+	IList<string> productNames = Db.Northwind.List(
+        Mappers.String(), "SELECT ProductName FROM Products");
+
+	IList<int> productIds = Db.Northwind.List(
+        Mappers.Int32(), "SELECT ProductID FROM Products");
 	
 	// 使用实现IConvertible的类型创建Mapper
-	IList<DateTime> orderDates = Db.Northwind.List(Mappers.Convertible<DateTime>(), "SELECT OrderDate FROM Orders");
+	IList<DateTime> orderDates = Db.Northwind.List(
+        Mappers.Convertible<DateTime>(), "SELECT OrderDate FROM Orders");
 
 ### 使用事务
 
-使用`CreateTransaction`方法来获取一个`ITransactionKeeper`事务容器。获取到的事务容器自身也实现了`IDbClient`，可以在其上进行各种CRUD操作。当然，事务的最后，别忘了`Commit`。
+使用`CreateTransaction`方法来获取一个`ITransactionKeeper`事务容器。获取到的事务容器自身也实现了`IDbClient`，可以在其上进行各种CRUD操作。
+
+事务的最后，别忘了`Commit`。
 
 `ITransactionKeeper`同时也实现了`IDisposable`接口，其`Dispose`方法能够在事务没有提交时进行事务回滚（如果已经提交，则什么也不做），利用这个机制和C#的using语法，可以很方便的编写一个在出现异常时回滚的事务操作。
 
