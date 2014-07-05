@@ -229,7 +229,7 @@ namespace cmstar.Data.Dynamic
                     cache.Params(client, param), commandType, timeOut);
             }
 
-            cache = CreateCacheItem(sql, param);
+            cache = CreateCacheItem(sql, commandType, param);
             var rows = client.Rows(sql, cache.Params(client, param), commandType, timeOut);
             foreach (var row in rows)
             {
@@ -267,7 +267,7 @@ namespace cmstar.Data.Dynamic
                     cache.Params(client, param), commandType, timeOut);
             }
 
-            cache = CreateCacheItem(sql, param);
+            cache = CreateCacheItem(sql, commandType, param);
             var dbParam = cache.Params(client, param).ToList();
             var rows = client.Rows(sql, dbParam, commandType, timeOut);
             var rowCount = 0;
@@ -333,7 +333,7 @@ namespace cmstar.Data.Dynamic
 
             if (cache == null)
             {
-                cache = CreateCacheItem(sql, param);
+                cache = CreateCacheItem(sql, commandType, param);
             }
 
             var rows = client.Rows(sql, cache.Params(client, param), commandType, timeOut);
@@ -372,14 +372,14 @@ namespace cmstar.Data.Dynamic
 
             if (cache == null)
             {
-                cache = CreateCacheItem(sql, param);
+                cache = CreateCacheItem(sql, commandType, param);
                 CommandCache.Set(id, cache);
             }
 
             return cache;
         }
 
-        private static CommandCacheItem CreateCacheItem(string sql, object param)
+        private static CommandCacheItem CreateCacheItem(string sql, CommandType commandType, object param)
         {
             if (param == null || string.IsNullOrEmpty(sql))
                 return new CommandCacheItem { Sql = sql, Params = NullParamProvider };
@@ -388,19 +388,30 @@ namespace cmstar.Data.Dynamic
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .ToDictionary(x => x.Name, x => x);
 
-            var patter = "[@:][a-zA-Z0-9_]+";
-            var matches = Regex.Matches(sql, patter);
             var paramProvider = new ParamProvider();
 
-            foreach (Match match in matches)
+            if (commandType == CommandType.Text)
             {
-                var name = match.Value.Substring(1);
+                var patter = "[@:][a-zA-Z0-9_]+";
+                var matches = Regex.Matches(sql, patter);
 
-                PropertyInfo prop;
-                if (!props.TryGetValue(name, out prop))
-                    continue;
+                foreach (Match match in matches)
+                {
+                    var name = match.Value.Substring(1);
 
-                paramProvider.AddDbParameterInfo(name, prop);
+                    PropertyInfo prop;
+                    if (!props.TryGetValue(name, out prop))
+                        continue;
+
+                    paramProvider.AddDbParameterInfo(name, prop);
+                }
+            }
+            else
+            {
+                foreach (var prop in props)
+                {
+                    paramProvider.AddDbParameterInfo(prop.Key, prop.Value);
+                }
             }
 
             return new CommandCacheItem
