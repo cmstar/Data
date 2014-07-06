@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -31,29 +32,29 @@ namespace cmstar.Data.Dynamic
 
             _targetConstructor = ConstructorInvokerGenerator.CreateDelegate(type);
 
-            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(x => x.CanWrite)
-                .ToDictionary(x => x.Name, x => x);
-            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-                .ToDictionary(x => x.Name, x => x);
+            var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(x => x.CanWrite).Cast<MemberInfo>();
+            var propMap = MakeMemberMap(props);
+
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+            var fieldMap = MakeMemberMap(fields);
 
             _targetMemberSetups = new List<MemberSetupInfo>();
+            var flags = new bool[template.FieldCount];
 
-            for (int i = 0; i < template.FieldCount; i++)
-            {
-                var name = template.GetName(i);
+            // 3-level match
+            // first use a strict match
+            Func<string, string, bool> fieldNameMemberNameMatches = (f, m) => f == m;
+            AppendMemberSetups(template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
 
-                if (properties.ContainsKey(name))
-                {
-                    var setupInfo = BuildSetupInfo(i, properties[name]);
-                    _targetMemberSetups.Add(setupInfo);
-                }
-                else if (fields.ContainsKey(name))
-                {
-                    var setupInfo = BuildSetupInfo(i, fields[name]);
-                    _targetMemberSetups.Add(setupInfo);
-                }
-            }
+            // use a case-insensitive match
+            fieldNameMemberNameMatches = (f, m) => StringComparer.OrdinalIgnoreCase.Compare(f, m) == 0;
+            AppendMemberSetups(template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
+
+            // ignores the underline in the field and then use a case-insensitive match
+            fieldNameMemberNameMatches = (f, m) =>
+                StringComparer.OrdinalIgnoreCase.Compare(f.Replace("_", ""), m) == 0;
+            AppendMemberSetups(template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
         }
 
         public T MapRow(IDataRecord record, int rowNum)
@@ -86,6 +87,63 @@ namespace cmstar.Data.Dynamic
             }
 
             return (T)obj; // if T is value type, unbox it here
+        }
+
+        // groups memberInfos by memberInfo.Name.Replace("_", "").ToLower()
+        private Dictionary<string, List<MemberInfo>> MakeMemberMap(IEnumerable<MemberInfo> memberInfos)
+        {
+            var map = new Dictionary<string, List<MemberInfo>>();
+
+            foreach (var memberInfo in memberInfos)
+            {
+                var name = memberInfo.Name.Replace("_", "").ToLower();
+
+                List<MemberInfo> memberList;
+                if (map.TryGetValue(name, out memberList))
+                {
+                    memberList.Add(memberInfo);
+                }
+                else
+                {
+                    memberList = new List<MemberInfo> { memberInfo };
+                    map.Add(name, memberList);
+                }
+            }
+
+            return map;
+        }
+
+        // Scan the template record with an array of flags in which true means the field at the
+        // corresbonding index has already been used by a MemberSetupInfo and should be ingored.
+        // Then, find a member with a matched name and setup.
+        private void AppendMemberSetups(IDataRecord template, bool[] flags,
+            Dictionary<string, List<MemberInfo>> propMap, Dictionary<string, List<MemberInfo>> fieldMap,
+            Func<string, string, bool> fieldNameMemberNameMatches)
+        {
+            for (int i = 0; i < flags.Length; i++)
+            {
+                if (flags[i])
+                    continue;
+
+                var name = template.GetName(i);
+                var pattern = name.Replace("_", "").ToLower();
+
+                List<MemberInfo> members;
+                if (!propMap.TryGetValue(pattern, out members) && !fieldMap.TryGetValue(pattern, out members))
+                    continue;
+                
+                for (int j = 0; j < members.Count; j++)
+                {
+                    var member = members[j];
+                    if (!fieldNameMemberNameMatches(name, member.Name))
+                        continue;
+
+                    _targetMemberSetups.Add(BuildSetupInfo(i, member));
+                    members.RemoveAt(j);
+                    flags[i] = true;
+                    break;
+                }
+            }
         }
 
         private MemberSetupInfo BuildSetupInfo(int dataColIndex, MemberInfo memberInfo)
