@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using cmstar.RapidReflection.Emit;
 
 namespace cmstar.Data.Dynamic
@@ -40,10 +40,10 @@ namespace cmstar.Data.Dynamic
             var fieldMap = MakeMemberMap(fields);
 
             _targetMemberSetups = new List<MemberSetupInfo>();
-            var flags = new bool[template.FieldCount];
+            var flags = new bool[template.FieldCount]; // all false
 
-            // 3-level match
-            // first use a strict match
+            // 3-level match:
+            // use a strict match
             Func<string, string, bool> fieldNameMemberNameMatches = (f, m) => f == m;
             AppendMemberSetups(template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
 
@@ -51,9 +51,8 @@ namespace cmstar.Data.Dynamic
             fieldNameMemberNameMatches = (f, m) => StringComparer.OrdinalIgnoreCase.Compare(f, m) == 0;
             AppendMemberSetups(template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
 
-            // ignores the underline in the field and then use a case-insensitive match
-            fieldNameMemberNameMatches = (f, m) =>
-                StringComparer.OrdinalIgnoreCase.Compare(f.Replace("_", ""), m) == 0;
+            // compare by the underlying name of the field
+            fieldNameMemberNameMatches = (f, m) => StringComparer.OrdinalIgnoreCase.Compare(GetUnderlyingName(f), m) == 0;
             AppendMemberSetups(template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
         }
 
@@ -66,13 +65,13 @@ namespace cmstar.Data.Dynamic
             foreach (var setup in _targetMemberSetups)
             {
                 var value = record.GetValue(setup.Index);
-
                 if (value == null)
                     continue;
 
+                var valueType = value.GetType();
                 try
                 {
-                    if (value.GetType() != setup.MemberType)
+                    if (valueType != setup.MemberType)
                         value = Convert.ChangeType(value, setup.MemberType);
 
                     setup.Setter(obj, value);
@@ -81,7 +80,7 @@ namespace cmstar.Data.Dynamic
                 {
                     var msg = string.Format(
                         "Can not cast the source data type {0} to member type {1} of member {2}.",
-                        value.GetType(), setup.MemberType, setup.MemberName);
+                        valueType, setup.MemberType, setup.MemberName);
                     throw new InvalidCastException(msg, e);
                 }
             }
@@ -89,24 +88,24 @@ namespace cmstar.Data.Dynamic
             return (T)obj; // if T is value type, unbox it here
         }
 
-        // groups memberInfos by memberInfo.Name.Replace("_", "").ToLower()
+        // groups memberInfos by the lowercase name
         private Dictionary<string, List<MemberInfo>> MakeMemberMap(IEnumerable<MemberInfo> memberInfos)
         {
             var map = new Dictionary<string, List<MemberInfo>>();
 
             foreach (var memberInfo in memberInfos)
             {
-                var name = memberInfo.Name.Replace("_", "").ToLower();
+                var underlyingName = GetUnderlyingName(memberInfo.Name);
 
                 List<MemberInfo> memberList;
-                if (map.TryGetValue(name, out memberList))
+                if (map.TryGetValue(underlyingName, out memberList))
                 {
                     memberList.Add(memberInfo);
                 }
                 else
                 {
                     memberList = new List<MemberInfo> { memberInfo };
-                    map.Add(name, memberList);
+                    map.Add(underlyingName, memberList);
                 }
             }
 
@@ -126,12 +125,15 @@ namespace cmstar.Data.Dynamic
                     continue;
 
                 var name = template.GetName(i);
-                var pattern = name.Replace("_", "").ToLower();
+                var underlyingName = GetUnderlyingName(name);
 
                 List<MemberInfo> members;
-                if (!propMap.TryGetValue(pattern, out members) && !fieldMap.TryGetValue(pattern, out members))
+                if (!propMap.TryGetValue(underlyingName, out members)
+                    && !fieldMap.TryGetValue(underlyingName, out members))
+                {
                     continue;
-                
+                }
+
                 for (int j = 0; j < members.Count; j++)
                 {
                     var member = members[j];
@@ -166,6 +168,26 @@ namespace cmstar.Data.Dynamic
             }
 
             return info;
+        }
+
+        // gets a name that ignores the internal underline character and then to lower case
+        // e.g. _Abc_deF => _abcdef
+        private string GetUnderlyingName(string name)
+        {
+            var sb = new StringBuilder(name.Length);
+
+            for (int i = 0; i < name.Length; i++)
+            {
+                var c = name[i];
+
+                if (i != 0 && i != name.Length && c == '_')
+                    continue;
+
+                c = char.ToLower(c);
+                sb.Append(c);
+            }
+
+            return sb.ToString();
         }
 
         private struct MemberSetupInfo
