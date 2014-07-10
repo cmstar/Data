@@ -394,10 +394,15 @@ namespace cmstar.Data.Dynamic
             {
                 var patter = "[@:][a-zA-Z0-9_]+";
                 var matches = Regex.Matches(sql, patter);
+                var existNames = new HashSet<string>();
 
                 foreach (Match match in matches)
                 {
                     var name = match.Value.Substring(1);
+
+                    // 避免重复处理
+                    if (!existNames.Add(name))
+                        continue;
 
                     PropertyInfo prop;
                     if (!props.TryGetValue(name, out prop))
