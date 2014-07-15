@@ -40,9 +40,10 @@ namespace cmstar.Data
             try
             {
                 connection = CreateAndOpenConnection();
-                var cmd = CreateCommand(connection, parameters, commandType, timeOut);
-                cmd.CommandText = sql;
-                return cmd.ExecuteScalar();
+                var cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                var res = cmd.ExecuteScalar();
+                cmd.Parameters.Clear();
+                return res;
             }
             catch (Exception ex)
             {
@@ -72,9 +73,10 @@ namespace cmstar.Data
             try
             {
                 connection = CreateAndOpenConnection();
-                var cmd = CreateCommand(connection, parameters, commandType, timeOut);
-                cmd.CommandText = sql;
-                return cmd.ExecuteNonQuery();
+                var cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                var i = cmd.ExecuteNonQuery();
+                cmd.Parameters.Clear();
+                return i;
             }
             catch (Exception ex)
             {
@@ -252,8 +254,7 @@ namespace cmstar.Data
             {
                 connection = CreateAndOpenConnection();
 
-                var cmd = CreateCommand(connection, parameters, commandType, timeOut);
-                cmd.CommandText = sql;
+                var cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
 
                 reader = cmd.ExecuteReader();
                 var rowCount = 0;
@@ -262,6 +263,8 @@ namespace cmstar.Data
                     var row = mapper.MapRow(reader, ++rowCount);
                     results.Add(row);
                 }
+
+                cmd.Parameters.Clear();
             }
             catch (Exception ex)
             {
@@ -294,12 +297,12 @@ namespace cmstar.Data
 
             DbConnection connection = null;
             DbDataReader reader = null;
+            DbCommand cmd;
 
             try
             {
                 connection = CreateAndOpenConnection();
-                var cmd = CreateCommand(connection, parameters, commandType, timeOut);
-                cmd.CommandText = sql;
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
 
                 reader = cmd.ExecuteReader();
             }
@@ -316,6 +319,8 @@ namespace cmstar.Data
 
             try
             {
+                cmd.Parameters.Clear();
+
                 while (reader.Read())
                 {
                     yield return reader;
@@ -370,17 +375,20 @@ namespace cmstar.Data
         /// 从指定的数据库连接上创建<see cref="DbCommand"/>对象。
         /// 在各<see cref="IDbClient"/>方法中使用此方法获取<see cref="DbCommand"/>对象。
         /// </summary>
+        /// <param name="commandText">执行的脚本。</param>
         /// <param name="connection">数据库连接。</param>
         /// <param name="parameters">数据库参数的序列。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns><see cref="DbCommand"/>的实例。</returns>
-        protected virtual DbCommand CreateCommand(
+        protected virtual DbCommand CreateCommand(string commandText,
             DbConnection connection, IEnumerable<DbParameter> parameters,
             CommandType commandType, int timeOut)
         {
             var cmd = connection.CreateCommand();
+
             cmd.CommandType = commandType;
+            cmd.CommandText = commandText;
             cmd.CommandTimeout = timeOut;
 
             if (parameters != null)
@@ -422,8 +430,7 @@ namespace cmstar.Data
             try
             {
                 connection = CreateAndOpenConnection();
-                var cmd = CreateCommand(connection, parameters, commandType, timeOut);
-                cmd.CommandText = sql;
+                var cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
 
                 var dataAdapter = Factory.CreateDataAdapter();
                 if (dataAdapter == null)
@@ -431,6 +438,8 @@ namespace cmstar.Data
 
                 dataAdapter.SelectCommand = cmd;
                 dataAdapter.Fill(dataSet);
+
+                cmd.Parameters.Clear();
             }
             catch (Exception ex)
             {

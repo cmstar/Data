@@ -215,11 +215,11 @@ namespace cmstar.Data
             //连接在Dispose时关闭，此处什么也不做
         }
 
-        protected override DbCommand CreateCommand(
+        protected override DbCommand CreateCommand(string sql,
             DbConnection connection, IEnumerable<DbParameter> parameters,
             CommandType commandType, int timeOut)
         {
-            var cmd = base.CreateCommand(connection, parameters, commandType, timeOut);
+            var cmd = base.CreateCommand(sql, connection, parameters, commandType, timeOut);
 
             //将DbCommand并入本地事务
             cmd.Transaction = LocalTransaction();
