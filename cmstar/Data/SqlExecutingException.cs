@@ -65,7 +65,7 @@ namespace cmstar.Data
             if (!string.IsNullOrEmpty(base.Message))
                 builder.AppendLine(base.Message);
 
-            builder.Append("The error occured while excuting command of type {");
+            builder.Append("The error occured while executing command of type {");
             builder.Append(CommandType).AppendLine("}:");
             builder.Append(CommandText);
 
