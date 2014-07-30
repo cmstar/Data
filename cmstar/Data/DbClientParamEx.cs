@@ -1,5 +1,7 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.Common;
+using cmstar.Data.Dynamic;
 
 namespace cmstar.Data
 {
@@ -19,7 +21,7 @@ namespace cmstar.Data
         /// <param name="direction">参数的输入、输出类型。</param>
         /// <returns><see cref="DbParameter"/>的实例。</returns>
         public static DbParameter CreateParameter(this IDbClient client,
-            string name, DbType dbType, object value = null, int size = 0, 
+            string name, DbType dbType, object value = null, int size = 0,
             ParameterDirection direction = ParameterDirection.Input)
         {
             var p = client.CreateParameter();
@@ -28,6 +30,47 @@ namespace cmstar.Data
             p.DbType = dbType;
             p.Size = size;
             p.Value = value;
+
+            return p;
+        }
+
+        /// <summary>
+        /// 创建一个SQL参数实例。SQL参数的类型由参数的值决定。
+        /// </summary>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
+        /// <param name="name">参数的名称。</param>
+        /// <param name="value">参数的值。</param>
+        /// <returns><see cref="DbParameter"/>的实例。</returns>
+        public static DbParameter CreateParameter(this IDbClient client, string name, object value)
+        {
+            var p = client.CreateParameter();
+
+            p.ParameterName = name;
+
+            if (value == null)
+            {
+                p.Value = DBNull.Value;
+                p.DbType = DbType.AnsiString;
+                p.Size = 1;
+            }
+            else
+            {
+                var dbType = DbTypeConvert.LookupDbType(value.GetType());
+
+                if (dbType == DbTypeConvert.NotSupporteDbType)
+                {
+                    throw new NotSupportedException(string.Format(
+                        "The type {0} can not be converted to a DbType.", value.GetType()));
+                }
+
+                p.DbType = dbType;
+                p.Value = value;
+
+                if (value is string)
+                {
+                    p.Size = 4000;
+                }
+            }
 
             return p;
         }
