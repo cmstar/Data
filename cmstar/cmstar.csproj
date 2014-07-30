@@ -51,6 +51,7 @@
     <Compile Include="Data\Dynamic\CommandCacheItem.cs" />
     <Compile Include="Data\Dynamic\CommandCache.cs" />
     <Compile Include="Data\Dynamic\CommandIdentity.cs" />
+    <Compile Include="Data\Dynamic\DataTableConvert.cs" />
     <Compile Include="Data\Indexing\IndexingExtension.cs" />
     <Compile Include="Data\Dynamic\MapperParser.cs" />
     <Compile Include="Data\Dynamic\ObjectiveExtension.cs" />
