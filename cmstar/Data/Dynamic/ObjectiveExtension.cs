@@ -220,7 +220,7 @@ namespace cmstar.Data.Dynamic
             string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
         {
             var paramType = param == null ? null : param.GetType();
-            var id = new CommandIdentity(client.ConnectionString, sql, commandType, paramType, null);
+            var id = new CommandIdentity(client.ConnectionString, sql, commandType, paramType, typeof(T));
             var cache = CommandCache.Get(id);
 
             if (cache != null)
@@ -258,7 +258,7 @@ namespace cmstar.Data.Dynamic
             string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
         {
             var paramType = param == null ? null : param.GetType();
-            var id = new CommandIdentity(client.ConnectionString, sql, commandType, paramType, null);
+            var id = new CommandIdentity(client.ConnectionString, sql, commandType, paramType, typeof(T));
             var cache = CommandCache.Get(id);
 
             if (cache != null)
@@ -360,7 +360,7 @@ namespace cmstar.Data.Dynamic
             string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
         {
             var paramType = param == null ? null : param.GetType();
-            var id = new CommandIdentity(client.ConnectionString, sql, commandType, paramType, null);
+            var id = new CommandIdentity(client.ConnectionString, sql, commandType, paramType, typeof(T));
             var cache = CommandCache.Get(id);
             var mapper = cache == null ? null : (IMapper<T>)cache.Mapper;
             var rowNum = 0;
