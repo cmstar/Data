@@ -10,7 +10,7 @@ namespace cmstar.Data.Dynamic
     /// anonymouse objects with the specified type.
     /// </summary>
     /// <typeparam name="T">The type which the data is mapped to.</typeparam>
-    public class AnonymousObjectMapper<T> : IMapper<T>
+    internal class AnonymousObjectMapper<T> : IMapper<T>
     {
         private readonly Func<object[], object> _contructor;
         private readonly ArgumentInfo[] _argumentInfos;
