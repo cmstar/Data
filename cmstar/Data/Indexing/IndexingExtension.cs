@@ -234,6 +234,20 @@ namespace cmstar.Data.Indexing
         }
 
         /// <summary>
+        /// 查询并根据结果返回目标类型的实例集合，由一个模板对象指定目标类型。
+        /// </summary>
+        /// <typeparam name="T">查询的目标类型。</typeparam>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
+        /// <param name="template">用于指定目标类型的模板对象。</param>
+        /// <param name="sql">SQL语句。</param>
+        /// <param name="param">参数表。</param>
+        /// <returns>目标类型的实例集合。</returns>
+        public static IList<T> List<T>(this IDbClient client, T template, string sql, params object[] param)
+        {
+            return Query<T>(client, sql, param).ToList();
+        }
+
+        /// <summary>
         /// 查询并根据结果返回目标类型的实例集合。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
@@ -244,6 +258,20 @@ namespace cmstar.Data.Indexing
         public static IList<T> List<T>(this IDbClient client, string sql, params object[] param)
         {
             return Query<T>(client, sql, param).ToList();
+        }
+
+        /// <summary>
+        /// 查询并根据结果返回目标类型的实例序列，由一个模板对象指定目标类型。
+        /// </summary>
+        /// <typeparam name="T">查询的目标类型。</typeparam>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
+        /// <param name="template">用于指定目标类型的模板对象。</param>
+        /// <param name="sql">SQL语句。</param>
+        /// <param name="param">参数表。</param>
+        /// <returns>目标类型的实例集合。</returns>
+        public static IEnumerable<T> Query<T>(this IDbClient client, T template, string sql, params object[] param)
+        {
+            return Query<T>(client, sql, param);
         }
 
         /// <summary>

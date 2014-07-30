@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace cmstar.Data.Dynamic
 {
@@ -12,6 +14,9 @@ namespace cmstar.Data.Dynamic
         {
             var type = typeof(T);
 
+            if (IsAnonymousType(type))
+                return new AnonymousObjectMapper<T>(template);
+
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 return (IMapper<T>)ParseNullableTypeMapper<T>(template);
 
@@ -19,6 +24,20 @@ namespace cmstar.Data.Dynamic
                 return Mappers.Convertible<T>();
 
             return new ObjectMapper<T>(template);
+        }
+
+        private static bool IsAnonymousType(Type type)
+        {
+            if (!type.IsGenericType)
+                return false;
+
+            if (!Attribute.IsDefined(type, typeof(CompilerGeneratedAttribute), false))
+                return false;
+
+            if ((type.Attributes & TypeAttributes.NotPublic) != TypeAttributes.NotPublic)
+                return false;
+
+            return type.Name.Contains("AnonymousType");
         }
 
         private static object ParseNullableTypeMapper<T>(IDataRecord template)

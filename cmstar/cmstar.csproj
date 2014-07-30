@@ -47,6 +47,7 @@
     <Compile Include="Data\AbstractDbClient.cs" />
     <Compile Include="Data\DataExpiredException.cs" />
     <Compile Include="Data\DbClientParamEx.cs" />
+    <Compile Include="Data\Dynamic\AnonymousObjectMapper.cs" />
     <Compile Include="Data\Dynamic\CommandCacheItem.cs" />
     <Compile Include="Data\Dynamic\CommandCache.cs" />
     <Compile Include="Data\Dynamic\CommandIdentity.cs" />

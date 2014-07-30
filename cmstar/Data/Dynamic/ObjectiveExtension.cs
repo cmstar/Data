@@ -297,6 +297,23 @@ namespace cmstar.Data.Dynamic
         }
 
         /// <summary>
+        /// 查询并根据结果返回目标类型的实例集合，由一个模板对象指定目标类型。
+        /// </summary>
+        /// <typeparam name="T">查询的目标类型。</typeparam>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
+        /// <param name="template">用于指定目标类型的模板对象。</param>
+        /// <param name="sql">SQL语句。</param>
+        /// <param name="param">记录SQL参数的对象。</param>
+        /// <param name="commandType">命令的类型。</param>
+        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <returns>目标类型的实例集合。</returns>
+        public static IList<T> List<T>(this IDbClient client,
+            T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
+        {
+            return Query<T>(client, sql, param, commandType, timeOut).ToList();
+        }
+
+        /// <summary>
         /// 查询并根据结果返回目标类型的实例集合。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
@@ -310,6 +327,23 @@ namespace cmstar.Data.Dynamic
             string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
         {
             return Query<T>(client, sql, param, commandType, timeOut).ToList();
+        }
+
+        /// <summary>
+        /// 查询并根据结果返回目标类型的实例序列，由一个模板对象指定目标类型。
+        /// </summary>
+        /// <typeparam name="T">查询的目标类型。</typeparam>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
+        /// <param name="template">用于指定目标类型的模板对象。</param>
+        /// <param name="sql">SQL语句。</param>
+        /// <param name="param">记录SQL参数的对象。</param>
+        /// <param name="commandType">命令的类型。</param>
+        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <returns>目标类型的实例序列。</returns>
+        public static IEnumerable<T> Query<T>(this IDbClient client,
+            T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
+        {
+            return Query<T>(client, sql, param, commandType, timeOut);
         }
 
         /// <summary>
