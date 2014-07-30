@@ -7,8 +7,8 @@
     <ProjectGuid>{180B3AD5-B8C2-4B19-B9F8-D7D073DF42FF}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>cmstarData.Tests</RootNamespace>
-    <AssemblyName>cmstar.Data</AssemblyName>
+    <RootNamespace>cmstar.Data</RootNamespace>
+    <AssemblyName>cmstar.Data.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

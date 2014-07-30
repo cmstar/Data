@@ -5,7 +5,7 @@ using System.Data.Common;
 using cmstar.Data.Dynamic;
 using cmstar.Data.Indexing;
 
-namespace cmstar.Data.Tests
+namespace cmstar.Data
 {
     class Program
     {
@@ -17,6 +17,7 @@ namespace cmstar.Data.Tests
             IndexingExtensionDemo();
         }
 
+        // ReSharper disable UnusedVariable
         private static void DynamicExtensionDemo()
         {
             DataSet ds = Db.Northwind.DataSet(
