@@ -31,6 +31,10 @@ namespace cmstar.Data
             Product product = Db.Northwind.Get<Product>("SELECT * FROM Products WHERE ProductID=115");
             IList<Product> products = Db.Northwind.List<Product>("SELECT * FROM Products");
             IList<DateTime> orderDates = Db.Northwind.List<DateTime>("SELECT OrderDate FROM Orders");
+
+            // 使用匿名对象作为模板
+            var template = new { ProductID = 0, ProductName = string.Empty };
+            var productsByTemplate = Db.Northwind.List(template, "SELECT * FROM Products");
         }
 
         private static void IndexingExtensionDemo()
