@@ -157,7 +157,7 @@ namespace cmstar.Data.Dynamic
             if (propInfo != null)
             {
                 info.MemberType = propInfo.PropertyType;
-                info.NeedConvertType = !dataFieldType.IsAssignableFrom(propInfo.PropertyType);
+                info.NeedConvertType = !propInfo.PropertyType.IsAssignableFrom(dataFieldType);
                 info.Setter = PropertyAccessorGenerator.CreateSetter(propInfo);
                 info.MemberName = propInfo.Name;
             }
@@ -165,7 +165,7 @@ namespace cmstar.Data.Dynamic
             {
                 var fieldInfo = (FieldInfo)memberInfo;
                 info.MemberType = fieldInfo.FieldType;
-                info.NeedConvertType = !dataFieldType.IsAssignableFrom(fieldInfo.FieldType);
+                info.NeedConvertType = !fieldInfo.FieldType.IsAssignableFrom(dataFieldType);
                 info.Setter = FieldAccessorGenerator.CreateSetter(fieldInfo);
                 info.MemberName = fieldInfo.Name;
             }
