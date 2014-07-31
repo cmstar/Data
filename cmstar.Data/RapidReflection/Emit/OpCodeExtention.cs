@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace cmstar.RapidReflection.Emit
+namespace cmstar.Data.RapidReflection.Emit
 {
     /// <summary>
     /// Provides a set of extention methods for <see cref="ILGenerator"/>

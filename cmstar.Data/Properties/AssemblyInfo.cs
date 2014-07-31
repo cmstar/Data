@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("cmstar")]
+[assembly: AssemblyTitle("cmstar.Data")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("cmstar")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyProduct("cmstar.Data")]
+[assembly: AssemblyCopyright("Copyright © Eric Ruan 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace cmstar
+namespace cmstar.Data
 {
     /// <summary>
     /// 包含参数验证的有关方法。

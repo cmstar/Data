@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace cmstar.RapidReflection.Emit
+namespace cmstar.Data.RapidReflection.Emit
 {
     public static class ConstructorInvokerGenerator
     {

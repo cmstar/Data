@@ -8,8 +8,8 @@
     <ProjectGuid>{395D5496-8BE1-43F5-A416-12FB72D79B3A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>cmstar</RootNamespace>
-    <AssemblyName>cmstar.DalSupport</AssemblyName>
+    <RootNamespace>cmstar.Data</RootNamespace>
+    <AssemblyName>cmstar.Data</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -30,7 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\cmstar.DalSupport.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\cmstar.Data.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -44,30 +44,30 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgAssert.cs" />
-    <Compile Include="Data\AbstractDbClient.cs" />
-    <Compile Include="Data\DataExpiredException.cs" />
-    <Compile Include="Data\DbClientParamEx.cs" />
-    <Compile Include="Data\Dynamic\AnonymousObjectMapper.cs" />
-    <Compile Include="Data\Dynamic\CommandCacheItem.cs" />
-    <Compile Include="Data\Dynamic\CommandCache.cs" />
-    <Compile Include="Data\Dynamic\CommandIdentity.cs" />
-    <Compile Include="Data\Dynamic\DataTableConvert.cs" />
-    <Compile Include="Data\Indexing\IndexingExtension.cs" />
-    <Compile Include="Data\Dynamic\MapperParser.cs" />
-    <Compile Include="Data\Dynamic\ObjectiveExtension.cs" />
-    <Compile Include="Data\Dynamic\DbTypeConvert.cs" />
-    <Compile Include="Data\Dynamic\ObjectMapper.cs" />
-    <Compile Include="Data\IDbClient.cs" />
-    <Compile Include="Data\IMapper.cs" />
-    <Compile Include="Data\IncorrectResultSizeException.cs" />
-    <Compile Include="Data\ITransactionKeeper.cs" />
-    <Compile Include="Data\ThreadLocalTransactionKeeper.cs" />
-    <Compile Include="Data\Mappers.cs" />
+    <Compile Include="AbstractDbClient.cs" />
+    <Compile Include="DataExpiredException.cs" />
+    <Compile Include="DbClientParamEx.cs" />
+    <Compile Include="Dynamic\AnonymousObjectMapper.cs" />
+    <Compile Include="Dynamic\CommandCacheItem.cs" />
+    <Compile Include="Dynamic\CommandCache.cs" />
+    <Compile Include="Dynamic\CommandIdentity.cs" />
+    <Compile Include="Dynamic\DataTableConvert.cs" />
+    <Compile Include="Indexing\IndexingExtension.cs" />
+    <Compile Include="Dynamic\MapperParser.cs" />
+    <Compile Include="Dynamic\ObjectiveExtension.cs" />
+    <Compile Include="Dynamic\DbTypeConvert.cs" />
+    <Compile Include="Dynamic\ObjectMapper.cs" />
+    <Compile Include="IDbClient.cs" />
+    <Compile Include="IMapper.cs" />
+    <Compile Include="IncorrectResultSizeException.cs" />
+    <Compile Include="ITransactionKeeper.cs" />
+    <Compile Include="ThreadLocalTransactionKeeper.cs" />
+    <Compile Include="Mappers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Data\SingleRowKeeper.cs" />
-    <Compile Include="Data\SqlDbClient.cs" />
-    <Compile Include="Data\SqlExecutingException.cs" />
-    <Compile Include="Data\TransactionScopeTransactionKeeper.cs" />
+    <Compile Include="SingleRowKeeper.cs" />
+    <Compile Include="SqlDbClient.cs" />
+    <Compile Include="SqlExecutingException.cs" />
+    <Compile Include="TransactionScopeTransactionKeeper.cs" />
     <Compile Include="RapidReflection\Emit\ConstructorInvokerGenerator.cs" />
     <Compile Include="RapidReflection\Emit\EmitUtils.cs" />
     <Compile Include="RapidReflection\Emit\FieldAccessorGenerator.cs" />

@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace cmstar.RapidReflection.Emit
+namespace cmstar.Data.RapidReflection.Emit
 {
     public static class EmitUtils
     {

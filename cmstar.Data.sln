@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cmstar", "cmstar\cmstar.csproj", "{395D5496-8BE1-43F5-A416-12FB72D79B3A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cmstar.Data", "cmstar.Data\cmstar.Data.csproj", "{395D5496-8BE1-43F5-A416-12FB72D79B3A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cmstar.Data.Tests", "cmstar.Data.Tests\cmstar.Data.Tests.csproj", "{180B3AD5-B8C2-4B19-B9F8-D7D073DF42FF}"
 EndProject
