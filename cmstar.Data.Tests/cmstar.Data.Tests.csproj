@@ -49,7 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\cmstar\cmstar.csproj">
+    <ProjectReference Include="..\cmstar.Data\cmstar.Data.csproj">
       <Project>{395D5496-8BE1-43F5-A416-12FB72D79B3A}</Project>
       <Name>cmstar</Name>
     </ProjectReference>
