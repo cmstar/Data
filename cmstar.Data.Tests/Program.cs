@@ -34,7 +34,7 @@ namespace cmstar.Data
 
             // 使用匿名对象作为模板
             var template = new { ProductID = 0, ProductName = string.Empty };
-            var productsByTemplate = Db.Northwind.List(template, "SELECT * FROM Products");
+            var productsByTemplate = Db.Northwind.TemplateList(template, "SELECT * FROM Products");
         }
 
         private static void IndexingExtensionDemo()

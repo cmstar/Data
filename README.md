@@ -230,7 +230,7 @@
 也可以使用匿名对象作为实体模板，在许多场景尤其是处理包含少量字段（但又多于1个）时尤其方便。
 
     var template = new { ProductID = 0, ProductName = string.Empty };
-    var productsByTemplate = Db.Northwind.List(template, "SELECT * FROM Products");
+    var productsByTemplate = Db.Northwind.TemplateList(template, "SELECT * FROM Products");
 
 ### 关于字段名称的匹配
 
