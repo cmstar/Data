@@ -105,7 +105,7 @@
     Db.Northwind.SizedExecute(
         expectedSize, "UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
 
-    // 获取一样
+    // 获取一行
     IDataRecord record = Db.Northwind.GetRow(
         "SELECT ProductName, SupplierID FROM Products WHERE ProductID=115");
 
