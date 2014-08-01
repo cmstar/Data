@@ -307,7 +307,7 @@ namespace cmstar.Data.Dynamic
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例集合。</returns>
-        public static IList<T> List<T>(this IDbClient client,
+        public static IList<T> TemplateList<T>(this IDbClient client,
             T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
         {
             return Query<T>(client, sql, param, commandType, timeOut).ToList();
@@ -340,7 +340,7 @@ namespace cmstar.Data.Dynamic
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例序列。</returns>
-        public static IEnumerable<T> Query<T>(this IDbClient client,
+        public static IEnumerable<T> TemplateQuery<T>(this IDbClient client,
             T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
         {
             return Query<T>(client, sql, param, commandType, timeOut);

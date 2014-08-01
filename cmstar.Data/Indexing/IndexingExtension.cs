@@ -242,7 +242,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>目标类型的实例集合。</returns>
-        public static IList<T> List<T>(this IDbClient client, T template, string sql, params object[] param)
+        public static IList<T> TemplateList<T>(this IDbClient client, T template, string sql, params object[] param)
         {
             return Query<T>(client, sql, param).ToList();
         }
@@ -269,7 +269,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>目标类型的实例集合。</returns>
-        public static IEnumerable<T> Query<T>(this IDbClient client, T template, string sql, params object[] param)
+        public static IEnumerable<T> TemplateQuery<T>(this IDbClient client, T template, string sql, params object[] param)
         {
             return Query<T>(client, sql, param);
         }
