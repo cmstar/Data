@@ -77,9 +77,29 @@ namespace cmstar.Data
                     if (i > 0)
                         builder.AppendLine();
 
+                    // PARAM name dbtype(length) direction: value
                     var p = Parameters[i];
-                    builder.AppendFormat("PARAM {0} {1}({2}) {3}: {4} ",
-                        p.ParameterName, p.DbType, p.Size, p.Direction, p.Value);
+                    builder.Append("PARAM");
+                    builder.Append(" ").Append(p.ParameterName);
+                    builder.Append(" ").Append(p.DbType);
+
+                    if (p.Size > 0)
+                    {
+                        builder.Append("(").Append(p.Size).Append(")");
+                    }
+
+                    builder.Append(" ").Append(p.Direction).Append(":");
+
+                    if (p.Value == DBNull.Value)
+                    {
+                        builder.Append("<NULL>");
+                    }
+                    else
+                    {
+                        builder.Append(" ").Append(p.Value);
+                    }
+
+                    builder.Append(" ");
                 }
             }
 
