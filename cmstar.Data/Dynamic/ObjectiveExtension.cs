@@ -492,7 +492,7 @@ namespace cmstar.Data.Dynamic
                     var dbParam = client.CreateParameter();
                     dbParam.ParameterName = p.Name;
                     dbParam.DbType = p.DbType;
-                    dbParam.Value = p.PropValueGetter(param);
+                    dbParam.Value = p.PropValueGetter(param) ?? DBNull.Value;
 
                     if (p.Size > 0)
                         dbParam.Size = p.Size;

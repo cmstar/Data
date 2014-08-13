@@ -29,7 +29,7 @@ namespace cmstar.Data
             p.ParameterName = name;
             p.DbType = dbType;
             p.Size = size;
-            p.Value = value;
+            p.Value = value ?? DBNull.Value;
 
             return p;
         }
