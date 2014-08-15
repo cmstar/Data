@@ -51,6 +51,7 @@ namespace cmstar.Data.Dynamic
 
                     var dataFieldType = template.GetFieldType(index);
                     argumentInfo.NeedConvertType = !pType.IsAssignableFrom(dataFieldType);
+                    argumentInfo.IsEnum = dataFieldType.IsEnum;
                 }
                 else
                 {
@@ -78,8 +79,22 @@ namespace cmstar.Data.Dynamic
                 {
                     value = record[argumentInfo.DataColIndex];
 
-                    if (argumentInfo.NeedConvertType)
+                    if (argumentInfo.IsEnum)
+                    {
+                        var stringValue = value as string;
+                        if (stringValue == null)
+                        {
+                            value = Enum.ToObject(argumentInfo.ParamType, value);
+                        }
+                        else
+                        {
+                            value = Enum.Parse(argumentInfo.ParamType, stringValue);
+                        }
+                    }
+                    else if (argumentInfo.NeedConvertType)
+                    {
                         value = Convert.ChangeType(value, argumentInfo.ParamType);
+                    }
                 }
 
                 args[i] = value;
@@ -108,6 +123,7 @@ namespace cmstar.Data.Dynamic
             public Type ParamType;
             public object DefaultValue;
             public bool NeedConvertType;
+            public bool IsEnum;
         }
     }
 }

@@ -67,12 +67,28 @@ namespace cmstar.Data.Dynamic
                 var value = record.GetValue(setup.Index);
                 if (value == null)
                     continue;
-                
+
                 var valueType = value.GetType();
                 try
                 {
-                    if (setup.NeedConvertType)
-                        value = Convert.ChangeType(value, setup.MemberType);
+                    var memberType = setup.MemberType;
+
+                    if (setup.IsEnum)
+                    {
+                        var stringValue = value as string;
+                        if (stringValue == null)
+                        {
+                            value = Enum.ToObject(memberType, value);
+                        }
+                        else
+                        {
+                            value = Enum.Parse(memberType, stringValue);
+                        }
+                    }
+                    else if (setup.NeedConvertType)
+                    {
+                        value = Convert.ChangeType(value, memberType);
+                    }
 
                     setup.Setter(obj, value);
                 }
@@ -156,16 +172,20 @@ namespace cmstar.Data.Dynamic
             var propInfo = memberInfo as PropertyInfo;
             if (propInfo != null)
             {
-                info.MemberType = propInfo.PropertyType;
-                info.NeedConvertType = !propInfo.PropertyType.IsAssignableFrom(dataFieldType);
+                var propertyType = propInfo.PropertyType;
+                info.MemberType = propertyType;
+                info.NeedConvertType = !propertyType.IsAssignableFrom(dataFieldType);
+                info.IsEnum = propertyType.IsEnum;
                 info.Setter = PropertyAccessorGenerator.CreateSetter(propInfo);
                 info.MemberName = propInfo.Name;
             }
             else
             {
                 var fieldInfo = (FieldInfo)memberInfo;
+                var fieldType = fieldInfo.FieldType;
                 info.MemberType = fieldInfo.FieldType;
                 info.NeedConvertType = !fieldInfo.FieldType.IsAssignableFrom(dataFieldType);
+                info.IsEnum = fieldType.IsEnum;
                 info.Setter = FieldAccessorGenerator.CreateSetter(fieldInfo);
                 info.MemberName = fieldInfo.Name;
             }
@@ -199,6 +219,7 @@ namespace cmstar.Data.Dynamic
             public string MemberName;
             public Type MemberType;
             public bool NeedConvertType;
+            public bool IsEnum;
             public Action<object, object> Setter;
         }
     }
