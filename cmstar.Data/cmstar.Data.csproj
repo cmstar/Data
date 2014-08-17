@@ -61,6 +61,7 @@
     <Compile Include="IMapper.cs" />
     <Compile Include="IncorrectResultSizeException.cs" />
     <Compile Include="ITransactionKeeper.cs" />
+    <Compile Include="RapidReflection\Emit\DelegateCache.cs" />
     <Compile Include="ThreadLocalTransactionKeeper.cs" />
     <Compile Include="Mappers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

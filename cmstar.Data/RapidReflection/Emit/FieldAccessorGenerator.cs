@@ -43,22 +43,11 @@ namespace cmstar.Data.RapidReflection.Emit
             if (fieldInfo == null)
                 throw new ArgumentNullException("fieldInfo");
 
-            if (typeof(TSource) != typeof(object) 
-                && !fieldInfo.DeclaringType.IsAssignableFrom(typeof(TSource)))
-            {
-                throw new ArgumentException(
-                   "The field's declaring type is not assignable from the type of the instance.",
-                   "fieldInfo");
-            }
+            var identity = new { fieldInfo, sourceType = typeof(TSource), returnType = typeof(TRet) };
+            var getter = (Func<TSource, TRet>)DelegateCache.GetOrAdd(
+                identity, x => DoCreateGetter<TSource, TRet>(fieldInfo));
 
-            if (!typeof(TRet).IsAssignableFrom(fieldInfo.FieldType))
-            {
-                throw new ArgumentException(
-                    "The type of the return value is not assignable from the type of the field.",
-                    "fieldInfo");
-            }
-
-            return EmitFieldGetter<TSource, TRet>(fieldInfo);
+            return getter;
         }
 
         /// <summary>
@@ -122,20 +111,49 @@ namespace cmstar.Data.RapidReflection.Emit
             if (fieldInfo == null)
                 throw new ArgumentNullException("fieldInfo");
 
+            var identity = new { fieldInfo, targetType = typeof(TTarget), valueType = typeof(TValue) };
+            var setter = (Action<TTarget, TValue>)DelegateCache.GetOrAdd(
+                identity, x => DoCreateSetter<TTarget, TValue>(fieldInfo));
+
+            return setter;
+        }
+
+        private static Func<TSource, TRet> DoCreateGetter<TSource, TRet>(FieldInfo fieldInfo)
+        {
+            if (typeof(TSource) != typeof(object)
+                && !fieldInfo.DeclaringType.IsAssignableFrom(typeof(TSource)))
+            {
+                throw new ArgumentException(
+                    "The field's declaring type is not assignable from the type of the instance.",
+                    "fieldInfo");
+            }
+
+            if (!typeof(TRet).IsAssignableFrom(fieldInfo.FieldType))
+            {
+                throw new ArgumentException(
+                    "The type of the return value is not assignable from the type of the field.",
+                    "fieldInfo");
+            }
+
+            return EmitFieldGetter<TSource, TRet>(fieldInfo);
+        }
+
+        private static Action<TTarget, TValue> DoCreateSetter<TTarget, TValue>(FieldInfo fieldInfo)
+        {
             if (typeof(TTarget).IsValueType)
             {
                 throw new ArgumentException(
-                   "The type of the isntance should not be a value type. " +
-                   "For a value type, use System.Object instead.",
-                   "fieldInfo");
+                    "The type of the isntance should not be a value type. " +
+                    "For a value type, use System.Object instead.",
+                    "fieldInfo");
             }
 
             if (typeof(TTarget) != typeof(object)
                 && !fieldInfo.DeclaringType.IsAssignableFrom(typeof(TTarget)))
             {
                 throw new ArgumentException(
-                   "The declaring type of the field is not assignable from the type of the isntance.",
-                   "fieldInfo");
+                    "The declaring type of the field is not assignable from the type of the isntance.",
+                    "fieldInfo");
             }
 
             if (typeof(TValue) != typeof(object)

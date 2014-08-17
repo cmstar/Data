@@ -23,42 +23,8 @@ namespace cmstar.Data.RapidReflection.Emit
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            if (type.IsInterface)
-                throw new ArgumentException("The type is an interface.", "type");
-
-            if (type.IsAbstract)
-                throw new ArgumentException("The type is abstract.", "type");
-
-            ConstructorInfo constructorInfo = null;
-            if (type.IsClass)
-            {
-                constructorInfo = type.GetConstructor(Type.EmptyTypes);
-
-                if (constructorInfo == null)
-                    throw new ArgumentException(
-                        "The type does not have a public parameterless constructor.", "type");
-            }
-
-            var dynamicMethod = EmitUtils.CreateDynamicMethod(
-                "$Create" + type, typeof(object), Type.EmptyTypes, type);
-            var il = dynamicMethod.GetILGenerator();
-
-            if (type.IsClass)
-            {
-                il.Newobj(constructorInfo);
-            }
-            else //value type
-            {
-                il.DeclareLocal(type);
-                il.LoadLocalVariableAddress(0);
-                il.Initobj(type);
-
-                il.LoadLocalVariable(0);
-                il.Box(type);
-            }
-
-            il.Ret();
-            return (Func<object>)dynamicMethod.CreateDelegate(typeof(Func<object>));
+            var constructor = (Func<object>)DelegateCache.GetOrAdd(type, x => DoCreateDelegate(type));
+            return constructor;
         }
 
         /// <summary>
@@ -106,6 +72,55 @@ namespace cmstar.Data.RapidReflection.Emit
             if (constructorInfo == null)
                 throw new ArgumentNullException("constructorInfo");
 
+            var identity = new { constructorInfo, validateArguments };
+            var constructor = (Func<object[], object>)DelegateCache.GetOrAdd(
+                identity, x => DoCreateDelegate(constructorInfo, validateArguments));
+
+            return constructor;
+        }
+
+        private static Func<object> DoCreateDelegate(Type type)
+        {
+            if (type.IsInterface)
+                throw new ArgumentException("The type is an interface.", "type");
+
+            if (type.IsAbstract)
+                throw new ArgumentException("The type is abstract.", "type");
+
+            ConstructorInfo constructorInfo = null;
+            if (type.IsClass)
+            {
+                constructorInfo = type.GetConstructor(Type.EmptyTypes);
+
+                if (constructorInfo == null)
+                    throw new ArgumentException(
+                        "The type does not have a public parameterless constructor.", "type");
+            }
+
+            var dynamicMethod = EmitUtils.CreateDynamicMethod(
+                "$Create" + type, typeof(object), Type.EmptyTypes, type);
+            var il = dynamicMethod.GetILGenerator();
+
+            if (type.IsClass)
+            {
+                il.Newobj(constructorInfo);
+            }
+            else //value type
+            {
+                il.DeclareLocal(type);
+                il.LoadLocalVariableAddress(0);
+                il.Initobj(type);
+
+                il.LoadLocalVariable(0);
+                il.Box(type);
+            }
+
+            il.Ret();
+            return (Func<object>)dynamicMethod.CreateDelegate(typeof(Func<object>));
+        }
+
+        private static Func<object[], object> DoCreateDelegate(ConstructorInfo constructorInfo, bool validateArguments)
+        {
             var delclaringType = constructorInfo.DeclaringType;
             if (delclaringType.IsAbstract)
             {

@@ -49,6 +49,15 @@ namespace cmstar.Data.RapidReflection.Emit
             if (methodInfo == null)
                 throw new ArgumentNullException("methodInfo");
 
+            var identity = new { methodInfo, validateArguments };
+            var method = (Func<object, object[], object>)DelegateCache.GetOrAdd(
+                identity, x => DoCreateDelegate(methodInfo, validateArguments));
+
+            return method;
+        }
+
+        private static Func<object, object[], object> DoCreateDelegate(MethodInfo methodInfo, bool validateArguments)
+        {
             var args = methodInfo.GetParameters();
             var dynamicMethod = EmitUtils.CreateDynamicMethod(
                 "$Call" + methodInfo.Name,

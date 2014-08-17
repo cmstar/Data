@@ -78,50 +78,11 @@ namespace cmstar.Data.RapidReflection.Emit
             if (propertyInfo == null)
                 throw new ArgumentNullException("propertyInfo");
 
-            if (propertyInfo.GetIndexParameters().Length > 0)
-            {
-                throw new ArgumentException(
-                   "Cannot create a dynamic getter for an indexed property.",
-                   "propertyInfo");
-            }
+            var identity = new { propertyInfo, nonPublic, sourceType = typeof(TSource), returnType = typeof(TRet) };
+            var getter = (Func<TSource, TRet>)DelegateCache.GetOrAdd(
+                identity, x => DoCreateGetter<TSource, TRet>(propertyInfo, nonPublic));
 
-            if (typeof(TSource) != typeof(object)
-                && !propertyInfo.DeclaringType.IsAssignableFrom(typeof(TSource)))
-            {
-                throw new ArgumentException(
-                   "The declaring type of the property is not assignable from the type of the instance.",
-                   "propertyInfo");
-            }
-
-            if (!typeof(TRet).IsAssignableFrom(propertyInfo.PropertyType))
-            {
-                throw new ArgumentException(
-                    "The type of the return value is not assignable from the type of the property.",
-                    "propertyInfo");
-            }
-
-            //the method call of the get accessor method fails in runtime 
-            //if the declaring type of the property is an interface and TSource is a value type, 
-            //in this case, we should find the property from TSource whose DeclaringType is TSource itself
-            if (typeof(TSource).IsValueType && propertyInfo.DeclaringType.IsInterface)
-            {
-                propertyInfo = typeof(TSource).GetProperty(propertyInfo.Name);
-            }
-
-            var getMethod = propertyInfo.GetGetMethod(nonPublic);
-            if (getMethod == null)
-            {
-                if (nonPublic)
-                {
-                    throw new ArgumentException(
-                        "The property does not have a get method.", "propertyInfo");
-                }
-
-                throw new ArgumentException(
-                    "The property does not have a public get method.", "propertyInfo");
-            }
-
-            return EmitPropertyGetter<TSource, TRet>(propertyInfo, getMethod);
+            return getter;
         }
 
         /// <summary>
@@ -230,27 +191,84 @@ namespace cmstar.Data.RapidReflection.Emit
             if (propertyInfo == null)
                 throw new ArgumentNullException("propertyInfo");
 
+            var identity = new { propertyInfo, nonPublic, targetType = typeof(TTarget), valueType = typeof(TValue) };
+            var setter = (Action<TTarget, TValue>)DelegateCache.GetOrAdd(
+                identity, x => DoCreateSetter<TTarget, TValue>(propertyInfo, nonPublic));
+
+            return setter;
+        }
+
+        private static Func<TSource, TRet> DoCreateGetter<TSource, TRet>(PropertyInfo propertyInfo, bool nonPublic)
+        {
+            if (propertyInfo.GetIndexParameters().Length > 0)
+            {
+                throw new ArgumentException(
+                    "Cannot create a dynamic getter for an indexed property.",
+                    "propertyInfo");
+            }
+
+            if (typeof(TSource) != typeof(object)
+                && !propertyInfo.DeclaringType.IsAssignableFrom(typeof(TSource)))
+            {
+                throw new ArgumentException(
+                    "The declaring type of the property is not assignable from the type of the instance.",
+                    "propertyInfo");
+            }
+
+            if (!typeof(TRet).IsAssignableFrom(propertyInfo.PropertyType))
+            {
+                throw new ArgumentException(
+                    "The type of the return value is not assignable from the type of the property.",
+                    "propertyInfo");
+            }
+
+            //the method call of the get accessor method fails in runtime 
+            //if the declaring type of the property is an interface and TSource is a value type, 
+            //in this case, we should find the property from TSource whose DeclaringType is TSource itself
+            if (typeof(TSource).IsValueType && propertyInfo.DeclaringType.IsInterface)
+            {
+                propertyInfo = typeof(TSource).GetProperty(propertyInfo.Name);
+            }
+
+            var getMethod = propertyInfo.GetGetMethod(nonPublic);
+            if (getMethod == null)
+            {
+                if (nonPublic)
+                {
+                    throw new ArgumentException(
+                        "The property does not have a get method.", "propertyInfo");
+                }
+
+                throw new ArgumentException(
+                    "The property does not have a public get method.", "propertyInfo");
+            }
+
+            return EmitPropertyGetter<TSource, TRet>(propertyInfo, getMethod);
+        }
+
+        private static Action<TTarget, TValue> DoCreateSetter<TTarget, TValue>(PropertyInfo propertyInfo, bool nonPublic)
+        {
             if (typeof(TTarget).IsValueType)
             {
                 throw new ArgumentException(
-                   "The type of the isntance should not be a value type. " +
-                   "For a value type, use System.Object instead.",
-                   "propertyInfo");
+                    "The type of the isntance should not be a value type. " +
+                    "For a value type, use System.Object instead.",
+                    "propertyInfo");
             }
 
             if (propertyInfo.GetIndexParameters().Length > 0)
             {
                 throw new ArgumentException(
-                   "Cannot create a dynamic setter for an indexed property.",
-                   "propertyInfo");
+                    "Cannot create a dynamic setter for an indexed property.",
+                    "propertyInfo");
             }
 
             if (typeof(TTarget) != typeof(object)
                 && !propertyInfo.DeclaringType.IsAssignableFrom(typeof(TTarget)))
             {
                 throw new ArgumentException(
-                   "The declaring type of the property is not assignable from the type of the isntance.",
-                   "propertyInfo");
+                    "The declaring type of the property is not assignable from the type of the isntance.",
+                    "propertyInfo");
             }
 
             if (typeof(TValue) != typeof(object)
