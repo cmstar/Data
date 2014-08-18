@@ -25,5 +25,11 @@ namespace cmstar.Data.Dynamic
         /// The instance of <see cref="IMapper{T}"/>.
         /// </summary>
         public object Mapper;
+
+
+        /// <summary>
+        /// A counter specifies how many times this cahce item is reused.
+        /// </summary>
+        public int Reused;
     }
 }
