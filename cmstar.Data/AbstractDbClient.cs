@@ -37,13 +37,12 @@ namespace cmstar.Data
             ArgAssert.NotNullOrEmpty(sql, "sql");
 
             DbConnection connection = null;
+            DbCommand cmd = null;
             try
             {
                 connection = CreateAndOpenConnection();
-                var cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
-                var res = cmd.ExecuteScalar();
-                cmd.Parameters.Clear();
-                return res;
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                return cmd.ExecuteScalar();
             }
             catch (Exception ex)
             {
@@ -51,6 +50,9 @@ namespace cmstar.Data
             }
             finally
             {
+                if (cmd != null)
+                    cmd.Parameters.Clear();
+
                 if (connection != null)
                     CloseConnection(connection);
             }
@@ -70,13 +72,12 @@ namespace cmstar.Data
             ArgAssert.NotNullOrEmpty(sql, "sql");
 
             DbConnection connection = null;
+            DbCommand cmd = null;
             try
             {
                 connection = CreateAndOpenConnection();
-                var cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
-                var i = cmd.ExecuteNonQuery();
-                cmd.Parameters.Clear();
-                return i;
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                return cmd.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
@@ -84,6 +85,9 @@ namespace cmstar.Data
             }
             finally
             {
+                if (cmd != null)
+                    cmd.Parameters.Clear();
+
                 if (connection != null)
                     CloseConnection(connection);
             }
@@ -197,13 +201,31 @@ namespace cmstar.Data
             ArgAssert.NotNullOrEmpty(sql, "sql");
             ArgAssert.NotNull(mapper, "mapper");
 
-            var rows = Rows(sql, parameters, commandType, timeOut);
-            foreach (var row in rows)
+            DbConnection connection = null;
+            IDataReader reader = null;
+            DbCommand cmd = null;
+            try
             {
-                return mapper.MapRow(row, 1);
+                connection = CreateAndOpenConnection();
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                reader = cmd.ExecuteReader();
+                return reader.Read() ? mapper.MapRow(reader, 1) : default(T);
             }
+            catch (Exception ex)
+            {
+                throw new SqlExecutingException(sql, commandType, parameters, ex);
+            }
+            finally
+            {
+                if (cmd != null)
+                    cmd.Parameters.Clear();
 
-            return default(T);
+                if (reader != null && !reader.IsClosed)
+                    reader.Close();
+
+                if (connection != null)
+                    CloseConnection(connection);
+            }
         }
 
         /// <summary>
@@ -249,12 +271,12 @@ namespace cmstar.Data
 
             var results = new List<T>();
             DbConnection connection = null;
+            DbCommand cmd = null;
             IDataReader reader = null;
             try
             {
                 connection = CreateAndOpenConnection();
-
-                var cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
 
                 reader = cmd.ExecuteReader();
                 var rowCount = 0;
@@ -263,8 +285,6 @@ namespace cmstar.Data
                     var row = mapper.MapRow(reader, ++rowCount);
                     results.Add(row);
                 }
-
-                cmd.Parameters.Clear();
             }
             catch (Exception ex)
             {
@@ -272,6 +292,9 @@ namespace cmstar.Data
             }
             finally
             {
+                if (cmd != null)
+                    cmd.Parameters.Clear();
+
                 if (reader != null && !reader.IsClosed)
                     reader.Close();
 
@@ -427,10 +450,11 @@ namespace cmstar.Data
             CommandType commandType, int timeOut)
         {
             DbConnection connection = null;
+            DbCommand cmd = null;
             try
             {
                 connection = CreateAndOpenConnection();
-                var cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
 
                 var dataAdapter = Factory.CreateDataAdapter();
                 if (dataAdapter == null)
@@ -438,8 +462,6 @@ namespace cmstar.Data
 
                 dataAdapter.SelectCommand = cmd;
                 dataAdapter.Fill(dataSet);
-
-                cmd.Parameters.Clear();
             }
             catch (Exception ex)
             {
@@ -447,6 +469,9 @@ namespace cmstar.Data
             }
             finally
             {
+                if (cmd != null)
+                    cmd.Parameters.Clear();
+
                 if (connection != null)
                     CloseConnection(connection);
             }
