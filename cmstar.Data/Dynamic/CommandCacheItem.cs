@@ -26,7 +26,6 @@ namespace cmstar.Data.Dynamic
         /// </summary>
         public object Mapper;
 
-
         /// <summary>
         /// A counter specifies how many times this cahce item is reused.
         /// </summary>
