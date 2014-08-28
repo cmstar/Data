@@ -32,8 +32,9 @@ namespace cmstar.Data.Dynamic
 
             _targetConstructor = ConstructorInvokerGenerator.CreateDelegate(type);
 
-            var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(x => x.CanWrite).Cast<MemberInfo>();
+            var props = type
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(x => x.CanWrite);
             var propMap = MakeMemberMap(props);
 
             var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
@@ -68,7 +69,13 @@ namespace cmstar.Data.Dynamic
                 if (value == null)
                     continue;
 
+                // deal with DBNull, wo consider that DBNull should be mapped to CLR null,
+                // but *NOT* for value types.
+                // Users should use Nullable<> (e.g. int?) types to accept DBNulls.
                 var valueType = value.GetType();
+                if (valueType == typeof(DBNull) && setup.CanBeNull)
+                    continue; // the member is not set so it will remain null
+
                 try
                 {
                     var memberType = setup.MemberType;
@@ -176,6 +183,7 @@ namespace cmstar.Data.Dynamic
                 info.MemberType = propertyType;
                 info.NeedConvertType = !propertyType.IsAssignableFrom(dataFieldType);
                 info.IsEnum = propertyType.IsEnum;
+                info.CanBeNull = TypeCanBeNull(propertyType);
                 info.Setter = PropertyAccessorGenerator.CreateSetter(propInfo);
                 info.MemberName = propInfo.Name;
             }
@@ -186,11 +194,23 @@ namespace cmstar.Data.Dynamic
                 info.MemberType = fieldInfo.FieldType;
                 info.NeedConvertType = !fieldInfo.FieldType.IsAssignableFrom(dataFieldType);
                 info.IsEnum = fieldType.IsEnum;
+                info.CanBeNull = TypeCanBeNull(fieldType);
                 info.Setter = FieldAccessorGenerator.CreateSetter(fieldInfo);
                 info.MemberName = fieldInfo.Name;
             }
 
             return info;
+        }
+
+        public static bool TypeCanBeNull(Type t)
+        {
+            if (!t.IsValueType)
+                return true;
+
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
+                return true;
+
+            return false;
         }
 
         // gets a name that ignores the internal underline character and then to lower case
@@ -220,6 +240,7 @@ namespace cmstar.Data.Dynamic
             public Type MemberType;
             public bool NeedConvertType;
             public bool IsEnum;
+            public bool CanBeNull;
             public Action<object, object> Setter;
         }
     }
