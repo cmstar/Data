@@ -13,6 +13,10 @@ namespace cmstar.Data.Dynamic
         public static IMapper<T> Parse<T>(IDataRecord template)
         {
             var type = typeof(T);
+            var fieldType = template.GetFieldType(0);
+
+            if (type.IsAssignableFrom(fieldType))
+                return Mappers.Direct<T>();
 
             if (IsAnonymousType(type))
                 return new AnonymousObjectMapper<T>(template);

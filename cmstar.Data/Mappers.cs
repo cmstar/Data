@@ -73,12 +73,23 @@ namespace cmstar.Data
         }
 
         /// <summary>
+        /// 直接返回指定类型，并不进行类型转换的<see cref="IMapper{T}"/>实现。
+        /// </summary>
+        /// <typeparam name="T">指定类型。</typeparam>
+        /// <param name="colName">使用的列名称，若为null则使用第一列。</param>
+        /// <returns><see cref="IMapper{T}"/>的实例。</returns>
+        public static IMapper<T> Direct<T>(string colName = null)
+        {
+            return new DirectTypeMapperImpl<T>(colName);
+        }
+
+        /// <summary>
         /// 创建对应指定类型的<see cref="IMapper{T}"/>实现，
         /// 指定的类型必须实现<see cref="IConvertible"/>。
         /// </summary>
         /// <typeparam name="T">指定类型。</typeparam>
         /// <param name="colName">使用的列名称，若为null则使用第一列。</param>
-        /// <returns></returns>
+        /// <returns><see cref="IMapper{T}"/>的实例。</returns>
         /// <exception cref="InvalidCastException">
         /// 当类型<typeparamref name="T"/>未实现<see cref="IConvertible"/>。
         /// </exception>
@@ -217,6 +228,22 @@ namespace cmstar.Data
             {
                 var v = _colName == null ? record[0] : record[_colName];
                 return (T)Convert.ChangeType(v, typeof(T));
+            }
+        }
+
+        private class DirectTypeMapperImpl<T> : IMapper<T>
+        {
+            private readonly string _colName;
+
+            public DirectTypeMapperImpl(string colName = null)
+            {
+                _colName = colName;
+            }
+
+            public T MapRow(IDataRecord record, int rowNum)
+            {
+                var v = _colName == null ? record[0] : record[_colName];
+                return (T)v;
             }
         }
     }
