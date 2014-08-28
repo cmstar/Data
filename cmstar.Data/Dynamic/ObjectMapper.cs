@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using cmstar.Data.RapidReflection.Emit;
+using cmstar.Data.Reflection.Emit;
 
 namespace cmstar.Data.Dynamic
 {

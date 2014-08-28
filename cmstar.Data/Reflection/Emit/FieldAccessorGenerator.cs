@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reflection;
 
-namespace cmstar.Data.RapidReflection.Emit
+namespace cmstar.Data.Reflection.Emit
 {
-    public static class FieldAccessorGenerator
+    internal static class FieldAccessorGenerator
     {
         /// <summary>
         /// Creates a dynamic method for getting the value of the given field.

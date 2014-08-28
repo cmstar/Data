@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 #endif
 
-namespace cmstar.Data.RapidReflection.Emit
+namespace cmstar.Data.Reflection.Emit
 {
     /// <summary>
     /// Provides a thread-safe cache for storing the delegates.

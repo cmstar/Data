@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reflection;
 
-namespace cmstar.Data.RapidReflection.Emit
+namespace cmstar.Data.Reflection.Emit
 {
-    public static class ConstructorInvokerGenerator
+    internal static class ConstructorInvokerGenerator
     {
         /// <summary>
         /// Creates a dynamic method for creating instances of the given type.

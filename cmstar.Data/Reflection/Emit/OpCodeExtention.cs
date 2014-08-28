@@ -2,13 +2,13 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace cmstar.Data.RapidReflection.Emit
+namespace cmstar.Data.Reflection.Emit
 {
     /// <summary>
     /// Provides a set of extention methods for <see cref="ILGenerator"/>
     /// for emitting the <see cref="OpCode"/>s.
     /// </summary>
-    public static class OpCodeExtention
+    internal static class OpCodeExtention
     {
         /// <summary>
         /// Transfers control to a target instruction if the first value is greater than

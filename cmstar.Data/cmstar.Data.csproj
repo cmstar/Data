@@ -61,7 +61,7 @@
     <Compile Include="IMapper.cs" />
     <Compile Include="IncorrectResultSizeException.cs" />
     <Compile Include="ITransactionKeeper.cs" />
-    <Compile Include="RapidReflection\Emit\DelegateCache.cs" />
+    <Compile Include="Reflection\Emit\DelegateCache.cs" />
     <Compile Include="ThreadLocalTransactionKeeper.cs" />
     <Compile Include="Mappers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -69,12 +69,12 @@
     <Compile Include="SqlDbClient.cs" />
     <Compile Include="SqlExecutingException.cs" />
     <Compile Include="TransactionScopeTransactionKeeper.cs" />
-    <Compile Include="RapidReflection\Emit\ConstructorInvokerGenerator.cs" />
-    <Compile Include="RapidReflection\Emit\EmitUtils.cs" />
-    <Compile Include="RapidReflection\Emit\FieldAccessorGenerator.cs" />
-    <Compile Include="RapidReflection\Emit\MethodInvokerGenerator.cs" />
-    <Compile Include="RapidReflection\Emit\OpCodeExtention.cs" />
-    <Compile Include="RapidReflection\Emit\PropertyAccessorGenerator.cs" />
+    <Compile Include="Reflection\Emit\ConstructorInvokerGenerator.cs" />
+    <Compile Include="Reflection\Emit\EmitUtils.cs" />
+    <Compile Include="Reflection\Emit\FieldAccessorGenerator.cs" />
+    <Compile Include="Reflection\Emit\MethodInvokerGenerator.cs" />
+    <Compile Include="Reflection\Emit\OpCodeExtention.cs" />
+    <Compile Include="Reflection\Emit\PropertyAccessorGenerator.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

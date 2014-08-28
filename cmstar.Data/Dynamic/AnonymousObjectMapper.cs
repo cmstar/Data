@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using cmstar.Data.RapidReflection.Emit;
+using cmstar.Data.Reflection.Emit;
 
 namespace cmstar.Data.Dynamic
 {

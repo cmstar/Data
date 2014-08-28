@@ -2,9 +2,9 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace cmstar.Data.RapidReflection.Emit
+namespace cmstar.Data.Reflection.Emit
 {
-    public static class EmitUtils
+    internal static class EmitUtils
     {
         /// <summary>
         /// Creates an instance of <see cref="DynamicMethod"/>.
