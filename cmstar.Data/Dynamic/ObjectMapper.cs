@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using cmstar.Data.Reflection;
 using cmstar.Data.Reflection.Emit;
 
 namespace cmstar.Data.Dynamic
@@ -183,7 +184,7 @@ namespace cmstar.Data.Dynamic
                 info.MemberType = propertyType;
                 info.NeedConvertType = !propertyType.IsAssignableFrom(dataFieldType);
                 info.IsEnum = propertyType.IsEnum;
-                info.CanBeNull = TypeCanBeNull(propertyType);
+                info.CanBeNull = ReflectionUtils.IsNullable(propertyType);
                 info.Setter = PropertyAccessorGenerator.CreateSetter(propInfo);
                 info.MemberName = propInfo.Name;
             }
@@ -194,23 +195,12 @@ namespace cmstar.Data.Dynamic
                 info.MemberType = fieldInfo.FieldType;
                 info.NeedConvertType = !fieldInfo.FieldType.IsAssignableFrom(dataFieldType);
                 info.IsEnum = fieldType.IsEnum;
-                info.CanBeNull = TypeCanBeNull(fieldType);
+                info.CanBeNull = ReflectionUtils.IsNullable(fieldType);
                 info.Setter = FieldAccessorGenerator.CreateSetter(fieldInfo);
                 info.MemberName = fieldInfo.Name;
             }
 
             return info;
-        }
-
-        public static bool TypeCanBeNull(Type t)
-        {
-            if (!t.IsValueType)
-                return true;
-
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
-                return true;
-
-            return false;
         }
 
         // gets a name that ignores the internal underline character and then to lower case

@@ -62,6 +62,7 @@
     <Compile Include="IncorrectResultSizeException.cs" />
     <Compile Include="ITransactionKeeper.cs" />
     <Compile Include="Reflection\Emit\DelegateCache.cs" />
+    <Compile Include="Reflection\ReflectionUtils.cs" />
     <Compile Include="ThreadLocalTransactionKeeper.cs" />
     <Compile Include="Mappers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
