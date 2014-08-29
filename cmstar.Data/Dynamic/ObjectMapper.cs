@@ -73,8 +73,7 @@ namespace cmstar.Data.Dynamic
                 // deal with DBNull, wo consider that DBNull should be mapped to CLR null,
                 // but *NOT* for value types.
                 // Users should use Nullable<> (e.g. int?) types to accept DBNulls.
-                var valueType = value.GetType();
-                if (valueType == typeof(DBNull) && setup.CanBeNull)
+                if (value == DBNull.Value && setup.CanBeNull)
                     continue; // the member is not set so it will remain null
 
                 try
@@ -102,6 +101,7 @@ namespace cmstar.Data.Dynamic
                 }
                 catch (Exception e)
                 {
+                    var valueType = value.GetType();
                     var msg = string.Format(
                         "Can not cast the source data type {0} to member type {1} of member {2}.",
                         valueType, setup.MemberType, setup.MemberName);

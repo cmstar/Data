@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using cmstar.Data.Reflection;
 using cmstar.Data.Reflection.Emit;
 
 namespace cmstar.Data.Dynamic
@@ -52,6 +53,7 @@ namespace cmstar.Data.Dynamic
                     var dataFieldType = template.GetFieldType(index);
                     argumentInfo.NeedConvertType = !pType.IsAssignableFrom(dataFieldType);
                     argumentInfo.IsEnum = dataFieldType.IsEnum;
+                    argumentInfo.CanBeNull = ReflectionUtils.IsNullable(p.ParameterType);
                 }
                 else
                 {
@@ -79,7 +81,11 @@ namespace cmstar.Data.Dynamic
                 {
                     value = record[argumentInfo.DataColIndex];
 
-                    if (argumentInfo.IsEnum)
+                    if (value == DBNull.Value && argumentInfo.CanBeNull)
+                    {
+                        value = null;
+                    }
+                    else if (argumentInfo.IsEnum)
                     {
                         var stringValue = value as string;
                         if (stringValue == null)
@@ -124,6 +130,7 @@ namespace cmstar.Data.Dynamic
             public object DefaultValue;
             public bool NeedConvertType;
             public bool IsEnum;
+            public bool CanBeNull;
         }
     }
 }
