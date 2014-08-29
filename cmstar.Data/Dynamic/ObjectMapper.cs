@@ -36,7 +36,12 @@ namespace cmstar.Data.Dynamic
             var props = type
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(x => x.CanWrite);
+
+#if NET35
+            var propMap = MakeMemberMap(props.Cast<MemberInfo>());
+#else
             var propMap = MakeMemberMap(props);
+#endif
 
             var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
             var fieldMap = MakeMemberMap(fields);
@@ -90,25 +95,26 @@ namespace cmstar.Data.Dynamic
                 try
                 {
                     var memberType = setup.MemberType;
+                    var finalValue = value;
 
                     if (setup.IsEnum)
                     {
                         var stringValue = value as string;
                         if (stringValue == null)
                         {
-                            value = Enum.ToObject(memberType, value);
+                            finalValue = Enum.ToObject(memberType, value);
                         }
                         else
                         {
-                            value = Enum.Parse(memberType, stringValue);
+                            finalValue = Enum.Parse(memberType, stringValue);
                         }
                     }
                     else if (setup.NeedConvertType)
                     {
-                        value = Convert.ChangeType(value, memberType);
+                        finalValue = Convert.ChangeType(value, memberType);
                     }
 
-                    setup.Setter(obj, value);
+                    setup.Setter(obj, finalValue);
                 }
                 catch (Exception e)
                 {
