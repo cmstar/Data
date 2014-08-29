@@ -39,6 +39,7 @@ namespace cmstar.Data.Dynamic
                 var pType = p.ParameterType;
                 var argumentInfo = new ArgumentInfo();
                 argumentInfo.ParamType = pType;
+                argumentInfo.Name = p.Name;
 
                 if (pType.IsValueType)
                 {
@@ -81,9 +82,19 @@ namespace cmstar.Data.Dynamic
                 {
                     value = record[argumentInfo.DataColIndex];
 
-                    if (value == DBNull.Value && argumentInfo.CanBeNull)
+                    if (value == DBNull.Value)
                     {
-                        value = null;
+                        if (argumentInfo.CanBeNull)
+                        {
+                            value = null;
+                        }
+                        else
+                        {
+                            var msg = string.Format(
+                                "Can not cast DBNull to member type {0} of member '{1}'.",
+                                argumentInfo.ParamType, argumentInfo.Name);
+                            throw new InvalidCastException(msg);
+                        }
                     }
                     else if (argumentInfo.IsEnum)
                     {
@@ -125,6 +136,7 @@ namespace cmstar.Data.Dynamic
 
         private struct ArgumentInfo
         {
+            public string Name;
             public int DataColIndex;
             public Type ParamType;
             public object DefaultValue;
