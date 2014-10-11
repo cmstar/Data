@@ -418,9 +418,18 @@ namespace cmstar.Data.Dynamic
             if (param == null || string.IsNullOrEmpty(sql))
                 return new CommandCacheItem { Sql = sql, Params = NullParamProvider };
 
-            var props = param.GetType()
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            // 参数可包含在属性或字段中，两种都要获取
+            var paramType = param.GetType();
+            var members = paramType
+                .GetFields(BindingFlags.Instance | BindingFlags.Public)
+                .Cast<MemberInfo>()
                 .ToDictionary(x => x.Name, x => x);
+
+            var props = paramType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            foreach (var prop in props)
+            {
+                members.Add(prop.Name, prop);
+            }
 
             var paramProvider = new ParamProvider();
 
@@ -438,18 +447,18 @@ namespace cmstar.Data.Dynamic
                     if (!existNames.Add(name))
                         continue;
 
-                    PropertyInfo prop;
-                    if (!props.TryGetValue(name, out prop))
+                    MemberInfo member;
+                    if (!members.TryGetValue(name, out member))
                         continue;
 
-                    paramProvider.AddDbParameterInfo(name, prop);
+                    paramProvider.AddDbParameterInfo(name, member);
                 }
             }
             else
             {
-                foreach (var prop in props)
+                foreach (var member in members)
                 {
-                    paramProvider.AddDbParameterInfo(prop.Key, prop.Value);
+                    paramProvider.AddDbParameterInfo(member.Key, member.Value);
                 }
             }
 
@@ -464,20 +473,25 @@ namespace cmstar.Data.Dynamic
         {
             private readonly List<DbParameterInfo> _parameterInfos = new List<DbParameterInfo>();
 
-            public void AddDbParameterInfo(string paramName, PropertyInfo propertyInfo)
+            public void AddDbParameterInfo(string paramName, MemberInfo memberInfo)
             {
-                var dbType = DbTypeConvert.LookupDbType(propertyInfo.PropertyType);
+                var memberType = memberInfo is PropertyInfo
+                    ? ((PropertyInfo)memberInfo).PropertyType
+                    : ((FieldInfo)memberInfo).FieldType;
+                var dbType = DbTypeConvert.LookupDbType(memberType);
                 if (dbType == DbTypeConvert.NotSupporteDbType)
                 {
                     throw new NotSupportedException(string.Format(
-                        "The type {0} can not be converted to a DbType.", propertyInfo.PropertyType));
+                        "The type {0} can not be converted to a DbType.", memberType));
                 }
 
                 var info = new DbParameterInfo();
                 info.Name = paramName;
                 info.DbType = dbType;
-                info.Size = propertyInfo.PropertyType == typeof(string) ? 4000 : -1;
-                info.PropValueGetter = PropertyAccessorGenerator.CreateGetter(propertyInfo);
+                info.Size = memberType == typeof(string) ? 4000 : -1;
+                info.ValueGetter = memberInfo is PropertyInfo
+                    ? PropertyAccessorGenerator.CreateGetter((PropertyInfo)memberInfo)
+                    : FieldAccessorGenerator.CreateGetter((FieldInfo)memberInfo);
 
                 _parameterInfos.Add(info);
             }
@@ -492,7 +506,7 @@ namespace cmstar.Data.Dynamic
                     var dbParam = client.CreateParameter();
                     dbParam.ParameterName = p.Name;
                     dbParam.DbType = p.DbType;
-                    dbParam.Value = p.PropValueGetter(param) ?? DBNull.Value;
+                    dbParam.Value = p.ValueGetter(param) ?? DBNull.Value;
 
                     if (p.Size > 0)
                         dbParam.Size = p.Size;
@@ -507,7 +521,7 @@ namespace cmstar.Data.Dynamic
             public string Name;
             public DbType DbType;
             public int Size;
-            public Func<object, object> PropValueGetter;
+            public Func<object, object> ValueGetter;
         }
     }
 }
