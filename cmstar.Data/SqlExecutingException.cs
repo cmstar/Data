@@ -15,6 +15,13 @@ namespace cmstar.Data
     {
         private string _message;
 
+        /// <summary>
+        /// 初始化<see cref="SqlExecutingException"/>的新实例。
+        /// </summary>
+        /// <param name="commandText">执行的SQL语句。</param>
+        /// <param name="commandType">SQL命令类型。</param>
+        /// <param name="parameters">参数表。</param>
+        /// <param name="innerException">指定引起此错误的异常。</param>
         public SqlExecutingException(
             string commandText,
             CommandType commandType,
@@ -26,6 +33,14 @@ namespace cmstar.Data
         {
         }
 
+        /// <summary>
+        /// 初始化<see cref="SqlExecutingException"/>的新实例。
+        /// </summary>
+        /// <param name="commandText">执行的SQL语句。</param>
+        /// <param name="commandType">SQL命令类型。</param>
+        /// <param name="parameters">参数表。</param>
+        /// <param name="message">此错误的描述信息。</param>
+        /// <param name="innerException">指定引起此错误的异常。</param>
         public SqlExecutingException(
             string commandText,
             CommandType commandType,
@@ -80,23 +95,31 @@ namespace cmstar.Data
                     // PARAM name dbtype(length) direction: value
                     var p = Parameters[i];
                     builder.Append("PARAM");
-                    builder.Append(" ").Append(p.ParameterName);
-                    builder.Append(" ").Append(p.DbType);
 
-                    if (p.Size > 0)
+                    if (p == null)
                     {
-                        builder.Append("(").Append(p.Size).Append(")");
-                    }
-
-                    builder.Append(" ").Append(p.Direction).Append(":");
-
-                    if (p.Value == DBNull.Value)
-                    {
-                        builder.Append("<NULL>");
+                        builder.Append(" Unspecified");
                     }
                     else
                     {
-                        builder.Append(" ").Append(p.Value);
+                        builder.Append(" ").Append(p.ParameterName);
+                        builder.Append(" ").Append(p.DbType);
+
+                        if (p.Size > 0)
+                        {
+                            builder.Append("(").Append(p.Size).Append(")");
+                        }
+
+                        builder.Append(" ").Append(p.Direction).Append(":");
+
+                        if (p.Value == DBNull.Value)
+                        {
+                            builder.Append("<NULL>");
+                        }
+                        else
+                        {
+                            builder.Append(" ").Append(p.Value);
+                        }
                     }
 
                     builder.Append(" ");
