@@ -106,7 +106,7 @@ namespace cmstar.Data
             string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeOut = 0)
         {
-            var actualSize = Execute(sql, null, commandType, timeOut);
+            var actualSize = Execute(sql, parameters, commandType, timeOut);
             if (actualSize != expectedSize)
                 throw new IncorrectResultSizeException(sql, commandType, parameters, expectedSize, actualSize);
         }
