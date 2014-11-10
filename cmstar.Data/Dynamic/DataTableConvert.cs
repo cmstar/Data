@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlTypes;
 
 namespace cmstar.Data.Dynamic
 {
@@ -23,32 +22,36 @@ namespace cmstar.Data.Dynamic
         {
             ArgAssert.NotNull(dataTable, "dataTable");
 
+            var rowCount = dataTable.Rows.Count;
             if (dataTable.Rows.Count == 0)
                 return new T[0];
 
             var id = new DataTableIdentity(typeof(T), dataTable);
-            var recordAdapter = new DataRecordFromDataTable(dataTable);
 
-            object mapperObj;
-            if (!DataTableMappers.TryGetValue(id, out mapperObj))
+            using (var reader = dataTable.CreateDataReader())
             {
-                mapperObj = MapperParser.Parse<T>(recordAdapter);
-                DataTableMappers[id] = mapperObj;
+                reader.Read();
+
+                object mapperObj;
+                if (!DataTableMappers.TryGetValue(id, out mapperObj))
+                {
+                    mapperObj = MapperParser.Parse<T>(reader);
+                    DataTableMappers[id] = mapperObj;
+                }
+
+                var mapper = (IMapper<T>)mapperObj;
+                var resultList = new List<T>(rowCount);
+                var i = 1;
+
+                do
+                {
+                    var t = mapper.MapRow(reader, i++);
+                    resultList.Add(t);
+
+                } while (reader.Read());
+
+                return resultList;
             }
-
-            var mapper = (IMapper<T>)mapperObj;
-            var rowCount = dataTable.Rows.Count;
-            var resultList = new List<T>(rowCount);
-
-            for (int i = 0; i < rowCount; i++)
-            {
-                recordAdapter.RowIndex = i;
-
-                var t = mapper.MapRow(recordAdapter, i + 1);
-                resultList.Add(t);
-            }
-
-            return resultList;
         }
 
         private class DataTableIdentity
@@ -109,156 +112,6 @@ namespace cmstar.Data.Dynamic
                 }
 
                 return true;
-            }
-        }
-
-        private class DataRecordFromDataTable : IDataRecord
-        {
-            private readonly DataTable _table;
-            private DataRow _currentRow;
-
-            public DataRecordFromDataTable(DataTable dataTable)
-            {
-                _table = dataTable;
-                _currentRow = _table.Rows[0];
-            }
-
-            public int RowIndex
-            {
-                set { _currentRow = _table.Rows[value]; }
-            }
-
-            public int FieldCount
-            {
-                get { return _table.Columns.Count; }
-            }
-
-            public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
-            {
-                throw new InvalidOperationException();
-            }
-
-            public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
-            {
-                throw new InvalidOperationException();
-            }
-
-            public IDataReader GetData(int i)
-            {
-                throw new InvalidOperationException();
-            }
-
-            public string GetDataTypeName(int i)
-            {
-                throw new InvalidOperationException();
-            }
-
-            public Type GetFieldType(int i)
-            {
-                return _table.Columns[i].DataType;
-            }
-
-            public string GetName(int i)
-            {
-                return _table.Columns[i].ColumnName;
-            }
-
-            public int GetOrdinal(string name)
-            {
-                return _table.Columns["name"].Ordinal;
-            }
-
-            public object GetValue(int i)
-            {
-                return _currentRow[i];
-            }
-
-            public int GetValues(object[] values)
-            {
-                throw new InvalidOperationException();
-            }
-
-            public object this[string name]
-            {
-                get { return _currentRow[name]; }
-            }
-
-            public object this[int i]
-            {
-                get { return GetValue(i); }
-            }
-
-            public bool GetBoolean(int i)
-            {
-                return Convert.ToBoolean(GetValue(i));
-            }
-
-            public byte GetByte(int i)
-            {
-                return Convert.ToByte(GetValue(i));
-            }
-
-            public char GetChar(int i)
-            {
-                return Convert.ToChar(GetValue(i));
-            }
-
-            public Guid GetGuid(int i)
-            {
-                var value = GetValue(i);
-
-                if (value is SqlGuid)
-                    return ((SqlGuid)value).Value;
-
-                if (value is Guid)
-                    return (Guid)value;
-
-                return new Guid(value.ToString());
-            }
-
-            public short GetInt16(int i)
-            {
-                return Convert.ToInt16(GetValue(i));
-            }
-
-            public int GetInt32(int i)
-            {
-                return Convert.ToInt32(GetValue(i));
-            }
-
-            public long GetInt64(int i)
-            {
-                return Convert.ToInt64(GetValue(i));
-            }
-
-            public float GetFloat(int i)
-            {
-                return Convert.ToSingle(GetValue(i));
-            }
-
-            public double GetDouble(int i)
-            {
-                return Convert.ToDouble(GetValue(i));
-            }
-
-            public string GetString(int i)
-            {
-                return GetValue(i).ToString();
-            }
-
-            public decimal GetDecimal(int i)
-            {
-                return Convert.ToDecimal(GetValue(i));
-            }
-
-            public DateTime GetDateTime(int i)
-            {
-                return Convert.ToDateTime(GetValue(i));
-            }
-
-            public bool IsDBNull(int i)
-            {
-                return GetValue(i) is DBNull;
             }
         }
     }
