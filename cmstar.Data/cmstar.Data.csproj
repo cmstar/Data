@@ -49,6 +49,7 @@
     <Compile Include="AbstractDataRecord.cs" />
     <Compile Include="DataRowRecord.cs" />
     <Compile Include="DbClientParamEx.cs" />
+    <Compile Include="DbClientWrapper.cs" />
     <Compile Include="Dynamic\AnonymousObjectMapper.cs" />
     <Compile Include="Dynamic\CommandCacheItem.cs" />
     <Compile Include="Dynamic\CommandCache.cs" />
