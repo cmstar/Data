@@ -46,6 +46,7 @@
     <Compile Include="ArgAssert.cs" />
     <Compile Include="AbstractDbClient.cs" />
     <Compile Include="DataExpiredException.cs" />
+    <Compile Include="AbstractDataRecord.cs" />
     <Compile Include="DataRowRecord.cs" />
     <Compile Include="DbClientParamEx.cs" />
     <Compile Include="Dynamic\AnonymousObjectMapper.cs" />

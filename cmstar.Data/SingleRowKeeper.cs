@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlTypes;
 
 namespace cmstar.Data
 {
@@ -19,8 +18,9 @@ namespace cmstar.Data
     /// <summary>
     /// 提供<see cref="IDataReader"/>的第一行记录的存储与检索。
     /// </summary>
-    internal class SingleRowKeeper : IDataRecord
+    internal class SingleRowKeeper : AbstractDataRecord
     {
+        private readonly int _fieldCount;
         private readonly object[] _values;
         private readonly Type[] _fieldTypes;
         private readonly string[] _columnNames;
@@ -37,7 +37,7 @@ namespace cmstar.Data
             ArgAssert.NotNull(dataRecord, "dataRecord");
 
             var fieldCount = dataRecord.FieldCount;
-            FieldCount = fieldCount;
+            _fieldCount = fieldCount;
 
             // keep meta data & values
             _values = new object[fieldCount];
@@ -52,161 +52,52 @@ namespace cmstar.Data
             }
         }
 
-        public int FieldCount { get; private set; }
-
-        public object this[int i]
+        public override int FieldCount
         {
-            get { return GetValue(i); }
+            get { return _fieldCount; }
         }
 
-        public object this[string name]
+        public override string GetName(int i)
         {
-            get
-            {
-                var index = GetOrdinal(name);
-                return _values[index];
-            }
-        }
-
-        public string GetName(int i)
-        {
-            ArgAssert.Between(i, "i", 0, _columnNames.Length);
+            ArgAssert.Between(i, "i", 0, _fieldCount);
             return _columnNames[i];
         }
 
-        public object GetValue(int i)
+        public override object GetValue(int i)
         {
-            ArgAssert.Between(i, "i", 0, _values.Length);
+            ArgAssert.Between(i, "i", 0, _fieldCount);
             return _values[i];
         }
 
-        public int GetValues(object[] values)
+        public override int GetValues(object[] values)
         {
             ArgAssert.NotNull(values, "values");
 
-            var num = Math.Min(values.Length, _values.Length);
+            var num = Math.Min(values.Length, _fieldCount);
             Array.Copy(_values, values, num);
             return num;
         }
 
-        public int GetOrdinal(string name)
+        public override int GetOrdinal(string name)
         {
             ArgAssert.NotNullOrEmpty(name, "name");
 
             //根据列的数量选择是遍历列，还是构造列的哈希表进行检索
-            return _columnNames.Length > 8 ? GetOrdinalByNameMap(name) : GetOrdinalByIteration(name);
+            return _fieldCount > 8 ? GetOrdinalByNameMap(name) : GetOrdinalByIteration(name);
         }
 
-        public bool GetBoolean(int i)
+        public override Type GetFieldType(int i)
         {
-            return Convert.ToBoolean(GetValue(i));
-        }
-
-        public byte GetByte(int i)
-        {
-            return Convert.ToByte(GetValue(i));
-        }
-
-        public char GetChar(int i)
-        {
-            return Convert.ToChar(GetValue(i));
-        }
-
-        public Guid GetGuid(int i)
-        {
-            var value = GetValue(i);
-
-            if (value is SqlGuid)
-                return ((SqlGuid)value).Value;
-
-            if (value is Guid)
-                return (Guid)value;
-
-            return new Guid(value.ToString());
-        }
-
-        public short GetInt16(int i)
-        {
-            return Convert.ToInt16(GetValue(i));
-        }
-
-        public int GetInt32(int i)
-        {
-            return Convert.ToInt32(GetValue(i));
-        }
-
-        public long GetInt64(int i)
-        {
-            return Convert.ToInt64(GetValue(i));
-        }
-
-        public float GetFloat(int i)
-        {
-            return Convert.ToSingle(GetValue(i));
-        }
-
-        public double GetDouble(int i)
-        {
-            return Convert.ToDouble(GetValue(i));
-        }
-
-        public string GetString(int i)
-        {
-            return GetValue(i).ToString();
-        }
-
-        public decimal GetDecimal(int i)
-        {
-            return Convert.ToDecimal(GetValue(i));
-        }
-
-        public DateTime GetDateTime(int i)
-        {
-            return Convert.ToDateTime(GetValue(i));
-        }
-
-        public bool IsDBNull(int i)
-        {
-            return GetValue(i) is DBNull;
-        }
-
-        public string GetDataTypeName(int i)
-        {
-            return GetFieldType(i).Name;
-        }
-
-        public Type GetFieldType(int i)
-        {
-            ArgAssert.Between(i, "i", 0, _fieldTypes.Length);
+            ArgAssert.Between(i, "i", 0, _fieldCount);
             return _fieldTypes[i];
-        }
-
-        IDataReader IDataRecord.GetData(int i)
-        {
-            throw InvalidOperation();
-        }
-
-        long IDataRecord.GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
-        {
-            throw InvalidOperation();
-        }
-
-        long IDataRecord.GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
-        {
-            throw InvalidOperation();
-        }
-
-        private InvalidOperationException InvalidOperation()
-        {
-            throw new InvalidOperationException();
         }
 
         private int GetOrdinalByNameMap(string name)
         {
             if (_nameMap == null)
             {
-                _nameMap = new Dictionary<string, int>(_columnNames.Length);
-                for (int i = 0; i < _columnNames.Length; i++)
+                _nameMap = new Dictionary<string, int>(_fieldCount);
+                for (int i = 0; i < _fieldCount; i++)
                 {
                     _nameMap[_columnNames[i]] = i;
                 }
@@ -221,7 +112,7 @@ namespace cmstar.Data
 
         private int GetOrdinalByIteration(string name)
         {
-            for (int i = 0; i < _columnNames.Length; i++)
+            for (int i = 0; i < _fieldCount; i++)
             {
                 if (name == _columnNames[i])
                     return i;
