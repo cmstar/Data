@@ -22,6 +22,7 @@ namespace cmstar.Data
     internal class SingleRowKeeper : IDataRecord
     {
         private readonly object[] _values;
+        private readonly Type[] _fieldTypes;
         private readonly string[] _columnNames;
         private Dictionary<string, int> _nameMap;
 
@@ -35,20 +36,19 @@ namespace cmstar.Data
         {
             ArgAssert.NotNull(dataRecord, "dataRecord");
 
-            FieldCount = dataRecord.FieldCount;
+            var fieldCount = dataRecord.FieldCount;
+            FieldCount = fieldCount;
 
-            //keep meta data
-            _columnNames = new string[dataRecord.FieldCount];
-            for (int i = 0; i < dataRecord.FieldCount; i++)
-            {
-                _columnNames[i] = dataRecord.GetName(i);
-            }
+            // keep meta data & values
+            _values = new object[fieldCount];
+            _fieldTypes = new Type[fieldCount];
+            _columnNames = new string[fieldCount];
 
-            //keep data values
-            _values = new object[dataRecord.FieldCount];
-            for (int i = 0; i < dataRecord.FieldCount; i++)
+            for (int i = 0; i < fieldCount; i++)
             {
                 _values[i] = dataRecord.GetValue(i);
+                _fieldTypes[i] = dataRecord.GetFieldType(i);
+                _columnNames[i] = dataRecord.GetName(i);
             }
         }
 
@@ -56,10 +56,7 @@ namespace cmstar.Data
 
         public object this[int i]
         {
-            get
-            {
-                return GetValue(i);
-            }
+            get { return GetValue(i); }
         }
 
         public object this[string name]
@@ -173,14 +170,15 @@ namespace cmstar.Data
             return GetValue(i) is DBNull;
         }
 
-        string IDataRecord.GetDataTypeName(int i)
+        public string GetDataTypeName(int i)
         {
-            throw InvalidOperation();
+            return GetFieldType(i).Name;
         }
 
-        Type IDataRecord.GetFieldType(int i)
+        public Type GetFieldType(int i)
         {
-            throw InvalidOperation();
+            ArgAssert.Between(i, "i", 0, _fieldTypes.Length);
+            return _fieldTypes[i];
         }
 
         IDataReader IDataRecord.GetData(int i)
