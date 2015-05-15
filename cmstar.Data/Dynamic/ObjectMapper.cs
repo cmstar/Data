@@ -75,7 +75,7 @@ namespace cmstar.Data.Dynamic
                 if (value == null)
                     continue;
 
-                // deal with DBNull, wo consider that DBNull should be mapped to CLR null,
+                // deal with DBNull, consider that DBNull should be mapped to CLR null,
                 // but *NOT* for value types.
                 // Users should use Nullable<> (e.g. int?) types to accept DBNulls.
                 if (value == DBNull.Value)
