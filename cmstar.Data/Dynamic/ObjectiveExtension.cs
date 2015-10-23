@@ -268,7 +268,7 @@ namespace cmstar.Data.Dynamic
             }
 
             cache = CreateCacheItem(sql, commandType, param);
-            var dbParam = cache.Params(client, param).ToList();
+            var dbParam = cache.Params(client, param);
             var rows = client.Rows(sql, dbParam, commandType, timeOut);
             var rowCount = 0;
             var res = default(T);
