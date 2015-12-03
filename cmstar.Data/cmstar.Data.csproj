@@ -55,9 +55,9 @@
     <Compile Include="Dynamic\CommandCache.cs" />
     <Compile Include="Dynamic\CommandIdentity.cs" />
     <Compile Include="Dynamic\DataTableConvert.cs" />
-    <Compile Include="Indexing\IndexingExtension.cs" />
+    <Compile Include="IndexingExtension.cs" />
     <Compile Include="Dynamic\MapperParser.cs" />
-    <Compile Include="Dynamic\ObjectiveExtension.cs" />
+    <Compile Include="ObjectiveExtension.cs" />
     <Compile Include="Dynamic\DbTypeConvert.cs" />
     <Compile Include="Dynamic\ObjectMapper.cs" />
     <Compile Include="IDbClient.cs" />

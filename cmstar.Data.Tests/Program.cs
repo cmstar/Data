@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using cmstar.Data.Dynamic;
-using cmstar.Data.Indexing;
 
 namespace cmstar.Data
 {
@@ -39,10 +37,10 @@ namespace cmstar.Data
 
         private static void IndexingExtensionDemo()
         {
-            DataTable dt = Db.Northwind.DataTable(
+            DataTable dt = Db.Northwind.IxDataTable(
                 "SELECT * FROM Products WHERE ProductName=@0 OR ProductID=@1", "Ikura", 115);
 
-            IList<Product> products = Db.Northwind.List<Product>(
+            IList<Product> products = Db.Northwind.IxList<Product>(
                 "SELECT * FROM Products WHERE ProductID IN (@0, @1)", 15, 16);
         }
 

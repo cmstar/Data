@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using cmstar.Data.Dynamic;
 
-namespace cmstar.Data.Indexing
+namespace cmstar.Data
 {
     /// <summary>
     /// 提供<see cref="IDbClient"/>的扩展方法，这些方法允许使用基于索引的SQL参数表以简化编码过程。
@@ -30,7 +30,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>查询结果的第一行第一列的值。若查询结果行数为0，返回<c>null</c>。</returns>
-        public static object Scalar(this IDbClient client, string sql, params object[] param)
+        public static object IxScalar(this IDbClient client, string sql, params object[] param)
         {
             return client.Scalar(sql, GenerateParameters(client, param));
         }
@@ -42,7 +42,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>SQL所影响的行数。</returns>
-        public static int Execute(this IDbClient client, string sql, params object[] param)
+        public static int IxExecute(this IDbClient client, string sql, params object[] param)
         {
             return client.Execute(sql, GenerateParameters(client, param));
         }
@@ -55,7 +55,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
-        public static void SizedExecute(this IDbClient client, int expectedSize, string sql, params object[] param)
+        public static void IxSizedExecute(this IDbClient client, int expectedSize, string sql, params object[] param)
         {
             client.SizedExecute(expectedSize, sql, GenerateParameters(client, param));
         }
@@ -67,7 +67,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
-        public static DataTable DataTable(this IDbClient client, string sql, params object[] param)
+        public static DataTable IxDataTable(this IDbClient client, string sql, params object[] param)
         {
             return client.DataTable(sql, GenerateParameters(client, param));
         }
@@ -79,7 +79,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
-        public static DataSet DataSet(this IDbClient client, string sql, params object[] param)
+        public static DataSet IxDataSet(this IDbClient client, string sql, params object[] param)
         {
             return client.DataSet(sql, GenerateParameters(client, param));
         }
@@ -91,7 +91,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>若查询结果至少包含1行，返回<c>true</c>；否则返回<c>false</c>。</returns>
-        public static bool Exists(this IDbClient client, string sql, params object[] param)
+        public static bool IxExists(this IDbClient client, string sql, params object[] param)
         {
             return client.Exists(sql, GenerateParameters(client, param));
         }
@@ -104,7 +104,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns><see cref="IDataRecord"/>的实现，包含查询的第一行记录。</returns>
-        public static IDataRecord GetRow(this IDbClient client, string sql, params object[] param)
+        public static IDataRecord IxGetRow(this IDbClient client, string sql, params object[] param)
         {
             return client.GetRow(sql, GenerateParameters(client, param));
         }
@@ -117,7 +117,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <returns>包含了各列的值的数组。</returns>
-        public static object[] ItemArray(this IDbClient client, string sql, params object[] param)
+        public static object[] IxItemArray(this IDbClient client, string sql, params object[] param)
         {
             return client.ItemArray(sql, GenerateParameters(client, param));
         }
@@ -132,7 +132,7 @@ namespace cmstar.Data.Indexing
         /// <param name="param">参数表。</param>
         /// <param name="mapper"><see cref="IMapper{T}"/>的实例。</param>
         /// <returns>目标类型的实例。</returns>
-        public static T Get<T>(this IDbClient client, IMapper<T> mapper, string sql, params object[] param)
+        public static T IxGet<T>(this IDbClient client, IMapper<T> mapper, string sql, params object[] param)
         {
             return client.Get(mapper, sql, GenerateParameters(client, param));
         }
@@ -148,7 +148,7 @@ namespace cmstar.Data.Indexing
         /// <param name="param">参数表。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
-        public static T ForceGet<T>(this IDbClient client, IMapper<T> mapper, string sql, params object[] param)
+        public static T IxForceGet<T>(this IDbClient client, IMapper<T> mapper, string sql, params object[] param)
         {
             return client.ForceGet(mapper, sql, GenerateParameters(client, param));
         }
@@ -162,7 +162,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>目标类型的实例的集合。若查询命中的行数为0，返回空集合。</returns>
-        public static IList<T> List<T>(this IDbClient client, IMapper<T> mapper, string sql, params object[] param)
+        public static IList<T> IxList<T>(this IDbClient client, IMapper<T> mapper, string sql, params object[] param)
         {
             return client.List(mapper, sql, GenerateParameters(client, param));
         }
@@ -174,7 +174,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>查询结果得行序列。</returns>
-        public static IEnumerable<IDataRecord> Rows(this IDbClient client, string sql, params object[] param)
+        public static IEnumerable<IDataRecord> IxRows(this IDbClient client, string sql, params object[] param)
         {
             return client.Rows(sql, GenerateParameters(client, param));
         }
@@ -188,14 +188,14 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>目标类型的实例。</returns>
-        public static T Get<T>(this IDbClient client, string sql, params object[] param)
+        public static T IxGet<T>(this IDbClient client, string sql, params object[] param)
         {
             var identity = new CommandIdentity(client.ConnectionString, string.Empty, null, null, typeof(T));
             var cache = CommandCache.Get(identity);
             if (cache != null)
-                return Get(client, (IMapper<T>)cache.Mapper, sql, param);
+                return IxGet(client, (IMapper<T>)cache.Mapper, sql, param);
 
-            var rows = Rows(client, sql, param);
+            var rows = IxRows(client, sql, param);
             foreach (var row in rows)
             {
                 var mapper = MapperParser.Parse<T>(row);
@@ -216,12 +216,12 @@ namespace cmstar.Data.Indexing
         /// <param name="param">参数表。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
-        public static T ForceGet<T>(this IDbClient client, string sql, params object[] param)
+        public static T IxForceGet<T>(this IDbClient client, string sql, params object[] param)
         {
             var identity = new CommandIdentity(client.ConnectionString, string.Empty, null, null, typeof(T));
             var cache = CommandCache.Get(identity);
             if (cache != null)
-                return ForceGet(client, (IMapper<T>)cache.Mapper, sql, param);
+                return IxForceGet(client, (IMapper<T>)cache.Mapper, sql, param);
 
             var dbParam = GenerateParameters(client, param).ToList();
             var rows = client.Rows(sql, dbParam);
@@ -255,9 +255,9 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>目标类型的实例集合。</returns>
-        public static IList<T> TemplateList<T>(this IDbClient client, T template, string sql, params object[] param)
+        public static IList<T> IxTemplateList<T>(this IDbClient client, T template, string sql, params object[] param)
         {
-            return Query<T>(client, sql, param).ToList();
+            return IxQuery<T>(client, sql, param).ToList();
         }
 
         /// <summary>
@@ -268,9 +268,9 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>目标类型的实例集合。</returns>
-        public static IList<T> List<T>(this IDbClient client, string sql, params object[] param)
+        public static IList<T> IxList<T>(this IDbClient client, string sql, params object[] param)
         {
-            return Query<T>(client, sql, param).ToList();
+            return IxQuery<T>(client, sql, param).ToList();
         }
 
         /// <summary>
@@ -282,9 +282,9 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>目标类型的实例集合。</returns>
-        public static IEnumerable<T> TemplateQuery<T>(this IDbClient client, T template, string sql, params object[] param)
+        public static IEnumerable<T> IxTemplateQuery<T>(this IDbClient client, T template, string sql, params object[] param)
         {
-            return Query<T>(client, sql, param);
+            return IxQuery<T>(client, sql, param);
         }
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace cmstar.Data.Indexing
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">参数表。</param>
         /// <returns>目标类型的实例序列。</returns>
-        public static IEnumerable<T> Query<T>(this IDbClient client, string sql, params object[] param)
+        public static IEnumerable<T> IxQuery<T>(this IDbClient client, string sql, params object[] param)
         {
             var identity = new CommandIdentity(client.ConnectionString, string.Empty, null, null, typeof(T));
             var cache = CommandCache.Get(identity);
@@ -304,7 +304,7 @@ namespace cmstar.Data.Indexing
             var rowNum = 0;
 
             // 展开foreach循环，使mapper == null的仅判断一次
-            using (var iter = Rows(client, sql, param).GetEnumerator())
+            using (var iter = IxRows(client, sql, param).GetEnumerator())
             {
                 if (!iter.MoveNext())
                     yield break;

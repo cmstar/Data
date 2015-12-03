@@ -6,8 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using cmstar.Data.Reflection.Emit;
+using cmstar.Data.Dynamic;
 
-namespace cmstar.Data.Dynamic
+namespace cmstar.Data
 {
     /// <summary>
     /// 提供<see cref="IDbClient"/>的扩展方法，这些方法可以将CLR对象用于SQL传参。

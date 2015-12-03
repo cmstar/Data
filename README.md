@@ -206,9 +206,9 @@
     }
 
 
-## Dynamic扩展
+## ObjectiveExtension扩展方法
 
-在`Data.Dynamic`命名空间的`ObjectiveExtension`类中，定义了一套`IDbClient`的扩展方法，能够使用更快捷的方式进行数据库操作。
+在`ObjectiveExtension`类中，定义了一套`IDbClient`的扩展方法，能够使用更快捷的方式进行数据库操作。
 
 ### .net对象传参
 
@@ -251,9 +251,9 @@
 *注意：使用匿名对象作为模板查询时，匿名对象的字段名称需和查询结果的字段名称完全匹配，不支持模糊匹配。*
 
 
-## Indexing扩展
+## IndexingExtension扩展方法
 
-在`Data.Indexing`命名空间的`IndexingExtension`类中，定义了另外一套`IDbClient`的扩展方法，能够基于索引访问传入的参数。
+在`IndexingExtension`类中，定义了另外一套`IDbClient`的扩展方法，能够基于索引访问传入的参数。
 
 记得`string.Format`方法吗：
 
@@ -261,10 +261,12 @@
 
 类似的，这些扩展方法用起来是这个样子的：
 
-    DataTable dt = Db.Northwind.DataTable(
+    DataTable dt = Db.Northwind.IxDataTable(
         "SELECT * FROM Products WHERE ProductName=@0 OR ProductID=@1", "Ikura", 115);
 
-    IList<Product> products = Db.Northwind.List<Product>(
+    IList<Product> products = Db.Northwind.IxList<Product>(
         "SELECT * FROM Products WHERE ProductID IN (@0, @1)", 15, 16);
+
+为了避免同`ObjectiveExtension`中的方法歧义，这套扩展方法均在方法名称前增加了“Ix”前缀。
 
 通常在一个地方并不混用两套扩展。Dynamic扩展会更泛用一些，但在一些特定的场景下，使用Indexing扩展也是个好主意。还有，这套扩展方法速度会更快一些。
