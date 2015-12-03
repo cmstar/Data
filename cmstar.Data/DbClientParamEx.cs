@@ -66,9 +66,10 @@ namespace cmstar.Data
                 p.DbType = dbType;
                 p.Value = value;
 
-                if (value is string)
+                var stringValue = value as string;
+                if (stringValue != null && stringValue.Length <= DbTypeConvert.DefaultStringSizeForDbParameter)
                 {
-                    p.Size = 4000;
+                    p.Size = DbTypeConvert.DefaultStringSizeForDbParameter;
                 }
             }
 

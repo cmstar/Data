@@ -492,7 +492,8 @@ namespace cmstar.Data.Dynamic
 
             public void AddDbParameterInfo(string paramName, MemberInfo memberInfo)
             {
-                var memberType = memberInfo is PropertyInfo
+                var isPropertyInfo = memberInfo is PropertyInfo;
+                var memberType = isPropertyInfo
                     ? ((PropertyInfo)memberInfo).PropertyType
                     : ((FieldInfo)memberInfo).FieldType;
                 var dbType = DbTypeConvert.LookupDbType(memberType);
@@ -505,8 +506,8 @@ namespace cmstar.Data.Dynamic
                 var info = new DbParameterInfo();
                 info.Name = paramName;
                 info.DbType = dbType;
-                info.Size = memberType == typeof(string) ? 4000 : -1;
-                info.ValueGetter = memberInfo is PropertyInfo
+                info.IsString = memberType == typeof(string);
+                info.ValueGetter = isPropertyInfo
                     ? PropertyAccessorGenerator.CreateGetter((PropertyInfo)memberInfo)
                     : FieldAccessorGenerator.CreateGetter((FieldInfo)memberInfo);
 
@@ -523,10 +524,21 @@ namespace cmstar.Data.Dynamic
                     var dbParam = client.CreateParameter();
                     dbParam.ParameterName = p.Name;
                     dbParam.DbType = p.DbType;
-                    dbParam.Value = p.ValueGetter(param) ?? DBNull.Value;
 
-                    if (p.Size > 0)
-                        dbParam.Size = p.Size;
+                    var value = p.ValueGetter(param);
+                    if (value == null)
+                    {
+                        dbParam.Value = DBNull.Value;
+                    }
+                    else
+                    {
+                        dbParam.Value = value;
+
+                        if (p.IsString && ((string)value).Length <= DbTypeConvert.DefaultStringSizeForDbParameter)
+                        {
+                            dbParam.Size = DbTypeConvert.DefaultStringSizeForDbParameter;
+                        }
+                    }
 
                     yield return dbParam;
                 }
@@ -537,7 +549,7 @@ namespace cmstar.Data.Dynamic
         {
             public string Name;
             public DbType DbType;
-            public int Size;
+            public bool IsString;
             public Func<object, object> ValueGetter;
         }
     }

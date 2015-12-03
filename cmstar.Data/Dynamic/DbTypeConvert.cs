@@ -10,6 +10,12 @@ namespace cmstar.Data.Dynamic
     internal class DbTypeConvert
     {
         /// <summary>
+        /// This value will be used for DbParameter.Size when the DbParameter.Value is string 
+        /// and the length of the string is not greater than this value.
+        /// </summary>
+        public const int DefaultStringSizeForDbParameter = 4000;
+
+        /// <summary>
         /// A special value represents that a CLR type has no corresponding <see cref="DbType"/>.
         /// </summary>
         public const DbType NotSupporteDbType = (DbType)(-1);

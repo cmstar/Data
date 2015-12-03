@@ -354,9 +354,11 @@ namespace cmstar.Data.Indexing
 
                     p.Value = value;
                     p.DbType = dbType;
-                    if (value is string)
+
+                    var stringValue = value as string;
+                    if (stringValue != null && stringValue.Length <= DbTypeConvert.DefaultStringSizeForDbParameter)
                     {
-                        p.Size = 4000;
+                        p.Size = DbTypeConvert.DefaultStringSizeForDbParameter;
                     }
                 }
 
