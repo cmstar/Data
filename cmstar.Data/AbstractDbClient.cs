@@ -181,7 +181,24 @@ namespace cmstar.Data
         public IDataRecord GetRow(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeOut = 0)
         {
-            return Get(new SingleRowKeeperMapper(), sql, parameters, commandType, timeOut);
+            return Get(SingleRowKeeperMapper.Instance, sql, parameters, commandType, timeOut);
+        }
+
+        /// <summary>
+        /// 获取查询结果的第一行记录，以数组形式返回记录内各列的值。
+        /// 数组元素顺序与列顺序一致。若查询命中的行数为0，返回null。
+        /// </summary>
+        /// <param name="sql">查询SQL。</param>
+        /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
+        /// <param name="commandType">命令的类型。</param>
+        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <returns>包含了各列的值的数组。</returns>
+        /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
+        /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
+        public object[] ItemArray(string sql, IEnumerable<DbParameter> parameters = null,
+            CommandType commandType = CommandType.Text, int timeOut = 0)
+        {
+            return Get(ItemArrayMapper.Instance, sql, parameters, commandType, timeOut);
         }
 
         /// <summary>

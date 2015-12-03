@@ -9,7 +9,7 @@ namespace cmstar.Data
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             BasicDemo();
             TransactionDemo();
@@ -70,12 +70,16 @@ namespace cmstar.Data
             int expectedSize = 0;
             Db.Northwind.SizedExecute(expectedSize, "UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
 
-            // 获取一样
+            // 获取一行
             IDataRecord record = Db.Northwind.GetRow("SELECT ProductName, SupplierID FROM Products WHERE ProductID=1");
             int supplierId = Convert.ToInt32(record["SupplierID"]);
 
+            // 获取一行，仅获取元素值
+            object[] itemArray = Db.Northwind.ItemArray("SELECT ProductName, SupplierID FROM Products WHERE ProductID=1");
+            supplierId = Convert.ToInt32(itemArray[1]);
+
             // 在不用在意资源释放的情况下使用DataReader，利用了foreach的机制，在循环结束后DataReader会自动关闭
-            IEnumerable<IDataRecord> rows = Db.Northwind.Rows("SELECT ProductName, SupplierID FROM Products WHERE ProductID=115");
+            IEnumerable<IDataRecord> rows = Db.Northwind.Rows("SELECT ProductName, SupplierID FROM Products WHERE ProductID IN (1, 2, 3)");
             foreach (IDataRecord row in rows)
             {
                 Console.WriteLine(row["ProductName"]);

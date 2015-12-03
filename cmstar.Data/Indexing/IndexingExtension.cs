@@ -110,6 +110,19 @@ namespace cmstar.Data.Indexing
         }
 
         /// <summary>
+        /// 获取查询结果的第一行记录，以数组形式返回记录内各列的值。
+        /// 数组元素顺序与列顺序一致。若查询命中的行数为0，返回null。
+        /// </summary>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
+        /// <param name="sql">SQL语句。</param>
+        /// <param name="param">记录SQL参数的对象。</param>
+        /// <returns>包含了各列的值的数组。</returns>
+        public static object[] ItemArray(this IDbClient client, string sql, params object[] param)
+        {
+            return client.ItemArray(sql, GenerateParameters(client, param));
+        }
+
+        /// <summary>
         /// 使用<see cref="IMapper{T}"/>查询指定对象。
         /// 若满足条件的记录不存在，返回目标类型的默认值（对于引用类型为<c>null</c>）。
         /// </summary>

@@ -9,6 +9,10 @@ namespace cmstar.Data
     /// </summary>
     internal class SingleRowKeeperMapper : IMapper<SingleRowKeeper>
     {
+        public static readonly SingleRowKeeperMapper Instance = new SingleRowKeeperMapper();
+
+        private SingleRowKeeperMapper() { }
+
         public SingleRowKeeper MapRow(IDataRecord record, int rowNum)
         {
             return new SingleRowKeeper(record);
@@ -119,6 +123,30 @@ namespace cmstar.Data
             }
 
             throw new IndexOutOfRangeException(name);
+        }
+    }
+
+    /// <summary>
+    /// 将<see cref="IDataRecord"/>内的列值转为数组。
+    /// </summary>
+    internal class ItemArrayMapper : IMapper<object[]>
+    {
+        public static readonly ItemArrayMapper Instance = new ItemArrayMapper();
+
+        private ItemArrayMapper() { }
+
+        public object[] MapRow(IDataRecord record, int rowNum)
+        {
+            ArgAssert.NotNull(record, "record");
+
+            var len = record.FieldCount;
+            var array = new object[len];
+            for (int i = 0; i < len; i++)
+            {
+                array[i] = record[i];
+            }
+
+            return array;
         }
     }
 }

@@ -64,6 +64,12 @@ namespace cmstar.Data
             return InternalClient.GetRow(sql, parameters, commandType, timeOut);
         }
 
+        public object[] ItemArray(string sql, IEnumerable<DbParameter> parameters = null,
+            CommandType commandType = CommandType.Text, int timeOut = 0)
+        {
+            return InternalClient.ItemArray(sql, parameters, commandType, timeOut);
+        }
+
         public virtual T Get<T>(IMapper<T> mapper, string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeOut = 0)
         {
