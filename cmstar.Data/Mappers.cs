@@ -73,7 +73,7 @@ namespace cmstar.Data
         }
 
         /// <summary>
-        /// 直接返回指定类型，并不进行类型转换的<see cref="IMapper{T}"/>实现。
+        /// 直接返回指定类型，或null（当值为DbNull时），不进行类型转换的<see cref="IMapper{T}"/>实现。
         /// </summary>
         /// <typeparam name="T">指定类型。</typeparam>
         /// <param name="colName">使用的列名称，若为null则使用第一列。</param>
@@ -243,7 +243,7 @@ namespace cmstar.Data
             public T MapRow(IDataRecord record, int rowNum)
             {
                 var v = _colName == null ? record[0] : record[_colName];
-                return (T)v;
+                return DBNull.Value.Equals(v) ? default(T) : (T)v;
             }
         }
     }
