@@ -181,7 +181,7 @@ namespace cmstar.Data
 
             public long MapRow(IDataRecord record, int rowNum)
             {
-                return _colName == null ? Convert.ToInt32(record[0]) : Convert.ToInt32(record[_colName]);
+                return _colName == null ? Convert.ToInt64(record[0]) : Convert.ToInt64(record[_colName]);
             }
         }
 
@@ -196,7 +196,7 @@ namespace cmstar.Data
 
             public decimal MapRow(IDataRecord record, int rowNum)
             {
-                return _colName == null ? Convert.ToInt32(record[0]) : Convert.ToInt32(record[_colName]);
+                return _colName == null ? Convert.ToDecimal(record[0]) : Convert.ToDecimal(record[_colName]);
             }
         }
 
@@ -211,7 +211,7 @@ namespace cmstar.Data
 
             public double MapRow(IDataRecord record, int rowNum)
             {
-                return _colName == null ? Convert.ToInt32(record[0]) : Convert.ToInt32(record[_colName]);
+                return _colName == null ? Convert.ToDouble(record[0]) : Convert.ToDouble(record[_colName]);
             }
         }
 
