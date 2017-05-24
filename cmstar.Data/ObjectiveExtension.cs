@@ -22,13 +22,13 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>查询结果的第一行第一列的值。若查询结果行数为0，返回<c>null</c>。</returns>
         public static object Scalar(this IDbClient client,
-            string sql, object param, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.Scalar(cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.Scalar(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -38,13 +38,13 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>SQL所影响的行数。</returns>
         public static int Execute(this IDbClient client,
-            string sql, object param, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.Execute(cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.Execute(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -55,14 +55,14 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
         public static void SizedExecute(this IDbClient client,
             int expectedSize, string sql, object param,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            client.SizedExecute(expectedSize, cache.Sql, cache.Params(client, param), commandType, timeOut);
+            client.SizedExecute(expectedSize, cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -72,13 +72,13 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
         public static DataTable DataTable(this IDbClient client,
-            string sql, object param, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.DataTable(cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.DataTable(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -88,13 +88,13 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
         public static DataSet DataSet(this IDbClient client,
-            string sql, object param, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.DataSet(cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.DataSet(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -104,13 +104,13 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>若查询结果至少包含1行，返回<c>true</c>；否则返回<c>false</c>。</returns>
         public static bool Exists(this IDbClient client,
-            string sql, object param, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.Exists(cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.Exists(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -121,13 +121,13 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns><see cref="IDataRecord"/>的实现，包含查询的第一行记录。</returns>
         public static IDataRecord GetRow(this IDbClient client,
-            string sql, object param, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.GetRow(cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.GetRow(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -138,13 +138,13 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>包含了各列的值的数组。</returns>
         public static object[] ItemArray(this IDbClient client,
-            string sql, object param, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.ItemArray(cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.ItemArray(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -157,14 +157,14 @@ namespace cmstar.Data
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="mapper"><see cref="IMapper{T}"/>的实例。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
         public static T Get<T>(this IDbClient client,
             IMapper<T> mapper, string sql, object param,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.Get(mapper, cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.Get(mapper, cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -177,15 +177,15 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
         public static T ForceGet<T>(this IDbClient client,
             IMapper<T> mapper, string sql, object param,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.ForceGet(mapper, cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.ForceGet(mapper, cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -197,14 +197,14 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例的集合。若查询命中的行数为0，返回空集合。</returns>
         public static IList<T> List<T>(this IDbClient client,
             IMapper<T> mapper, string sql, object param,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.List(mapper, cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.List(mapper, cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -214,13 +214,13 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>查询结果得行序列。</returns>
         public static IEnumerable<IDataRecord> Rows(this IDbClient client,
-            string sql, object param, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return client.Rows(cache.Sql, cache.Params(client, param), commandType, timeOut);
+            return client.Rows(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -232,10 +232,10 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
         public static T Get<T>(this IDbClient client,
-            string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var paramType = param == null ? null : param.GetType();
             var id = new CommandIdentity(client.ConnectionString, sql, commandType, paramType, typeof(T));
@@ -244,11 +244,11 @@ namespace cmstar.Data
             if (cache != null)
             {
                 return client.Get((IMapper<T>)cache.Mapper, cache.Sql,
-                    cache.Params(client, param), commandType, timeOut);
+                    cache.Params(client, param), commandType, timeout);
             }
 
             cache = CreateCacheItem(sql, commandType, param);
-            var rows = client.Rows(sql, cache.Params(client, param), commandType, timeOut);
+            var rows = client.Rows(sql, cache.Params(client, param), commandType, timeout);
             foreach (var row in rows)
             {
                 var mapper = MapperParser.Parse<T>(row);
@@ -269,11 +269,11 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
         public static T ForceGet<T>(this IDbClient client,
-            string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var paramType = param == null ? null : param.GetType();
             var id = new CommandIdentity(client.ConnectionString, sql, commandType, paramType, typeof(T));
@@ -282,12 +282,12 @@ namespace cmstar.Data
             if (cache != null)
             {
                 return client.ForceGet((IMapper<T>)cache.Mapper, cache.Sql,
-                    cache.Params(client, param), commandType, timeOut);
+                    cache.Params(client, param), commandType, timeout);
             }
 
             cache = CreateCacheItem(sql, commandType, param);
             var dbParam = cache.Params(client, param);
-            var rows = client.Rows(sql, dbParam, commandType, timeOut);
+            var rows = client.Rows(sql, dbParam, commandType, timeout);
             var rowCount = 0;
             var res = default(T);
 
@@ -323,12 +323,12 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例集合。</returns>
         public static IList<T> TemplateList<T>(this IDbClient client,
-            T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
+            T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return Query<T>(client, sql, param, commandType, timeOut).ToList();
+            return Query<T>(client, sql, param, commandType, timeout).ToList();
         }
 
         /// <summary>
@@ -339,12 +339,12 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例集合。</returns>
         public static IList<T> List<T>(this IDbClient client,
-            string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return Query<T>(client, sql, param, commandType, timeOut).ToList();
+            return Query<T>(client, sql, param, commandType, timeout).ToList();
         }
 
         /// <summary>
@@ -356,12 +356,12 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例序列。</returns>
         public static IEnumerable<T> TemplateQuery<T>(this IDbClient client,
-            T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
+            T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return Query<T>(client, sql, param, commandType, timeOut);
+            return Query<T>(client, sql, param, commandType, timeout);
         }
 
         /// <summary>
@@ -372,10 +372,10 @@ namespace cmstar.Data
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例序列。</returns>
         public static IEnumerable<T> Query<T>(this IDbClient client,
-            string sql, object param = null, CommandType commandType = CommandType.Text, int timeOut = 0)
+            string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var paramType = param == null ? null : param.GetType();
             var id = new CommandIdentity(client.ConnectionString, sql, commandType, paramType, typeof(T));
@@ -388,7 +388,7 @@ namespace cmstar.Data
                 cache = CreateCacheItem(sql, commandType, param);
             }
 
-            var rows = client.Rows(sql, cache.Params(client, param), commandType, timeOut);
+            var rows = client.Rows(sql, cache.Params(client, param), commandType, timeout);
 
             // 展开foreach循环，使mapper == null的仅判断一次
             using (var iter = rows.GetEnumerator())

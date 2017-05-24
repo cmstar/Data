@@ -27,12 +27,12 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>查询结果的第一行第一列的值。若查询结果行数为0，返回<c>null</c>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
         public object Scalar(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, "sql");
 
@@ -41,7 +41,7 @@ namespace cmstar.Data
             try
             {
                 connection = CreateAndOpenConnection();
-                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeout);
                 return cmd.ExecuteScalar();
             }
             catch (Exception ex)
@@ -64,10 +64,10 @@ namespace cmstar.Data
         /// <param name="sql">非查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
         public int Execute(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, "sql");
 
@@ -76,7 +76,7 @@ namespace cmstar.Data
             try
             {
                 connection = CreateAndOpenConnection();
-                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeout);
                 return cmd.ExecuteNonQuery();
             }
             catch (Exception ex)
@@ -100,13 +100,13 @@ namespace cmstar.Data
         /// <param name="sql">非查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
         public void SizedExecute(int expectedSize,
             string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            var actualSize = Execute(sql, parameters, commandType, timeOut);
+            var actualSize = Execute(sql, parameters, commandType, timeout);
             if (actualSize != expectedSize)
                 throw new IncorrectResultSizeException(sql, commandType, parameters, expectedSize, actualSize);
         }
@@ -117,14 +117,14 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
         public DataTable DataTable(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return DataSet(sql, parameters, commandType, timeOut).Tables[0];
+            return DataSet(sql, parameters, commandType, timeout).Tables[0];
         }
 
         /// <summary>
@@ -133,17 +133,17 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataSet"/>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
         public DataSet DataSet(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, "sql");
 
             var ds = new DataSet();
-            FillDataSet(ds, sql, parameters, commandType, timeOut);
+            FillDataSet(ds, sql, parameters, commandType, timeout);
             return ds;
         }
 
@@ -153,14 +153,14 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>若查询结果至少包含1行，返回<c>true</c>；否则返回<c>false</c>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
         public bool Exists(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return Scalar(sql, parameters, commandType, timeOut) != null;
+            return Scalar(sql, parameters, commandType, timeout) != null;
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns><see cref="IDataRecord"/>的实现，包含查询的第一行记录。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
@@ -179,9 +179,9 @@ namespace cmstar.Data
         /// 也不需要调用<see cref="IDisposable.Dispose"/>。
         /// </remarks>
         public IDataRecord GetRow(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return Get(SingleRowKeeperMapper.Instance, sql, parameters, commandType, timeOut);
+            return Get(SingleRowKeeperMapper.Instance, sql, parameters, commandType, timeout);
         }
 
         /// <summary>
@@ -191,14 +191,14 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>包含了各列的值的数组。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
         public object[] ItemArray(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return Get(ItemArrayMapper.Instance, sql, parameters, commandType, timeOut);
+            return Get(ItemArrayMapper.Instance, sql, parameters, commandType, timeout);
         }
 
         /// <summary>
@@ -209,11 +209,11 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <param name="mapper"><see cref="IMapper{T}"/>的实例。</param>
         /// <returns>目标类型的实例。</returns>
         public T Get<T>(IMapper<T> mapper, string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, "sql");
             ArgAssert.NotNull(mapper, "mapper");
@@ -224,7 +224,7 @@ namespace cmstar.Data
             try
             {
                 connection = CreateAndOpenConnection();
-                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeout);
                 reader = cmd.ExecuteReader();
                 return reader.Read() ? mapper.MapRow(reader, 1) : default(T);
             }
@@ -254,14 +254,14 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
         public T ForceGet<T>(IMapper<T> mapper,
             string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            var res = List(mapper, sql, parameters, commandType, timeOut);
+            var res = List(mapper, sql, parameters, commandType, timeout);
 
             if (res.Count != 1)
                 throw new IncorrectResultSizeException(sql, commandType, parameters, 1, res.Count);
@@ -277,11 +277,11 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例的集合。若查询命中的行数为0，返回空集合。</returns>
         public IList<T> List<T>(IMapper<T> mapper,
             string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, "sql");
             ArgAssert.NotNull(mapper, "mapper");
@@ -293,7 +293,7 @@ namespace cmstar.Data
             try
             {
                 connection = CreateAndOpenConnection();
-                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeout);
 
                 reader = cmd.ExecuteReader();
                 var rowCount = 0;
@@ -328,10 +328,10 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>查询结果得行序列。</returns>
         public IEnumerable<IDataRecord> Rows(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int timeOut = 0)
+            CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, "sql");
 
@@ -342,7 +342,7 @@ namespace cmstar.Data
             try
             {
                 connection = CreateAndOpenConnection();
-                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeout);
 
                 reader = cmd.ExecuteReader();
             }
@@ -419,17 +419,17 @@ namespace cmstar.Data
         /// <param name="connection">数据库连接。</param>
         /// <param name="parameters">数据库参数的序列。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeOut">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns><see cref="DbCommand"/>的实例。</returns>
         protected virtual DbCommand CreateCommand(string commandText,
             DbConnection connection, IEnumerable<DbParameter> parameters,
-            CommandType commandType, int timeOut)
+            CommandType commandType, int timeout)
         {
             var cmd = connection.CreateCommand();
 
             cmd.CommandType = commandType;
             cmd.CommandText = commandText;
-            cmd.CommandTimeout = timeOut;
+            cmd.CommandTimeout = timeout;
 
             if (parameters != null)
             {
@@ -464,14 +464,14 @@ namespace cmstar.Data
 
         private void FillDataSet(DataSet dataSet,
             string sql, IEnumerable<DbParameter> parameters,
-            CommandType commandType, int timeOut)
+            CommandType commandType, int timeout)
         {
             DbConnection connection = null;
             DbCommand cmd = null;
             try
             {
                 connection = CreateAndOpenConnection();
-                cmd = CreateCommand(sql, connection, parameters, commandType, timeOut);
+                cmd = CreateCommand(sql, connection, parameters, commandType, timeout);
 
                 var dataAdapter = Factory.CreateDataAdapter();
                 if (dataAdapter == null)

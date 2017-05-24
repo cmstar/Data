@@ -217,9 +217,9 @@ namespace cmstar.Data
 
         protected override DbCommand CreateCommand(string sql,
             DbConnection connection, IEnumerable<DbParameter> parameters,
-            CommandType commandType, int timeOut)
+            CommandType commandType, int timeout)
         {
-            var cmd = base.CreateCommand(sql, connection, parameters, commandType, timeOut);
+            var cmd = base.CreateCommand(sql, connection, parameters, commandType, timeout);
 
             //将DbCommand并入本地事务
             cmd.Transaction = LocalTransaction();
