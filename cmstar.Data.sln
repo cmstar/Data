@@ -7,6 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cmstar.Data", "cmstar.Data\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cmstar.Data.Tests", "cmstar.Data.Tests\cmstar.Data.Tests.csproj", "{180B3AD5-B8C2-4B19-B9F8-D7D073DF42FF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net35", "net35", "{CF4E8BD5-24D1-4E27-BCF7-DAED7272495D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net46", "net46", "{9D9410B6-31C0-42E6-B024-6BB5A046FEE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cmstar.Data.Net35", "cmstar.Data.Net35\cmstar.Data.Net35.csproj", "{23A1462E-7C92-4518-901B-470444E93927}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,8 +43,25 @@ Global
 		{180B3AD5-B8C2-4B19-B9F8-D7D073DF42FF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{180B3AD5-B8C2-4B19-B9F8-D7D073DF42FF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{180B3AD5-B8C2-4B19-B9F8-D7D073DF42FF}.Release|x86.ActiveCfg = Release|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Debug|x86.Build.0 = Debug|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Release|x86.ActiveCfg = Release|Any CPU
+		{23A1462E-7C92-4518-901B-470444E93927}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{395D5496-8BE1-43F5-A416-12FB72D79B3A} = {9D9410B6-31C0-42E6-B024-6BB5A046FEE2}
+		{180B3AD5-B8C2-4B19-B9F8-D7D073DF42FF} = {9D9410B6-31C0-42E6-B024-6BB5A046FEE2}
+		{23A1462E-7C92-4518-901B-470444E93927} = {CF4E8BD5-24D1-4E27-BCF7-DAED7272495D}
 	EndGlobalSection
 EndGlobal
