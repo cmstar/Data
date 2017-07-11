@@ -9,19 +9,22 @@ namespace cmstar.Data
     /// </summary>
     public class TransactionScopeTransactionKeeper : AbstractDbClient, ITransactionKeeper
     {
-        private readonly DbProviderFactory _factory;
-        private readonly string _connectionString;
         private readonly TransactionScope _tran;
         private bool _transactionCompleted;
         private bool _disposed;
 
+        /// <summary>
+        /// 初始化类型的新实例。
+        /// </summary>
+        /// <param name="dbProviderFactory"><see cref="DbProviderFactory"/>的实例。</param>
+        /// <param name="connectionString">指定数据库的连接字符串。</param>
         public TransactionScopeTransactionKeeper(DbProviderFactory dbProviderFactory, string connectionString)
         {
             ArgAssert.NotNull(dbProviderFactory, "dbProviderFactory");
             ArgAssert.NotNullOrEmptyOrWhitespace(connectionString, "connectionString");
 
-            _factory = dbProviderFactory;
-            _connectionString = connectionString;
+            Factory = dbProviderFactory;
+            ConnectionString = connectionString;
 
             //鉴于应用场景，直接开启事务控制（不过数据库连接还没初始化）
             _tran = new TransactionScope();
@@ -30,18 +33,12 @@ namespace cmstar.Data
         /// <summary>
         /// 获取当前实例所使用的数据库连接字符串。
         /// </summary>
-        public override string ConnectionString
-        {
-            get { return _connectionString; }
-        }
+        public override string ConnectionString { get; }
 
         /// <summary>
         /// 获取当前实例所使用的<see cref="DbProviderFactory"/>实例。
         /// </summary>
-        protected override DbProviderFactory Factory
-        {
-            get { return _factory; }
-        }
+        protected override DbProviderFactory Factory { get; }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, 
@@ -83,12 +80,14 @@ namespace cmstar.Data
             Dispose();
         }
 
+        /// <inheritdoc cref="IDbClient.CreateTransaction"/>
         public override ITransactionKeeper CreateTransaction()
         {
             ValidateStatus();
             return this;
         }
 
+        /// <inheritdoc cref="AbstractDbClient.CreateConnection"/>
         protected override DbConnection CreateConnection()
         {
             ValidateStatus();
@@ -98,7 +97,7 @@ namespace cmstar.Data
         private void ValidateStatus()
         {
             if (_transactionCompleted)
-                throw new InvalidOperationException("事务已结束。");
+                throw new InvalidOperationException("The transaction was finished.");
 
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);

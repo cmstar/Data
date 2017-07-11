@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace cmstar.Data
 {
@@ -13,6 +16,65 @@ namespace cmstar.Data
             TransactionDemo();
             DynamicExtensionDemo();
             IndexingExtensionDemo();
+            AsyncDemo().Wait();
+
+            Console.WriteLine("Done!!");
+            Console.ReadKey();
+        }
+
+        private static async Task AsyncDemo()
+        {
+            Action<string> log = msg =>
+            {
+                Console.WriteLine($"[AsyncDemo workder {Thread.CurrentThread.ManagedThreadId}] {msg}");
+            };
+
+            log("Calling DataTableAsync ...");
+            DataTable dt = await Db.Northwind.DataTableAsync(
+                "SELECT ProductID, ProductName, UnitPrice FROM Products WHERE ProductName=@name OR ProductID=@id",
+                new { name = "Ikura", id = 115 });
+            var row = dt.Rows[0];
+            log($"row0 - ProductName: {row[1]}, UnitPrice: {row[2]}.");
+
+            log("Calling IxGetAsync ...");
+            Product product = await Db.Northwind.IxGetAsync<Product>("SELECT * FROM Products WHERE ProductID=@0", 1);
+            log($"ProductID: {product.ProductID}, ProductName: {product.ProductName}.");
+
+            log("Calling ListAsync ...");
+            IList<DateTime> orderDates = await Db.Northwind.ListAsync<DateTime>("SELECT OrderDate FROM Orders");
+            log($"Length: {orderDates.Count}, first: {(orderDates.Count > 0 ? orderDates[0].ToString() : "<nil>")}");
+
+            log("Calling TemplateListAsync ...");
+            var template = new { ProductID = 0, ProductName = string.Empty };
+            var products = await Db.Northwind.TemplateListAsync(template, "SELECT * FROM Products");
+            log($"Length: {products.Count}, first: {(products.Count > 0 ? products[0].ProductName : "")}.");
+
+            log("Testing async transaction ...");
+            const int id = 6;
+            using (var tran = Db.Northwind.CreateTransaction())
+            {
+                
+                log($"Before update: {await tran.IxScalarAsync("SELECT UnitsInStock FROM Products WHERE ProductID=7", id)}");
+
+                await tran.IxExecuteAsync(
+                    "UPDATE Products SET UnitsInStock=UnitsInStock-1 WHERE ProductID=@0 AND UnitsInStock>0", 7);
+
+                log($"After update: {await tran.IxScalarAsync("SELECT UnitsInStock FROM Products WHERE ProductID=7", id)}");
+
+                // 递归事务
+                using (var tran2 = tran.CreateTransaction())
+                {
+                    await tran2.IxExecuteAsync(
+                        "UPDATE Products SET UnitsInStock=UnitsInStock-1 WHERE ProductID=@0 AND UnitsInStock>0", 7);
+
+                    tran2.Commit();
+                }
+
+                log($"After 2nd update: {await tran.IxScalarAsync("SELECT UnitsInStock FROM Products WHERE ProductID=7", id)}");
+
+                // 不提交，连同递归的事务中的提交内容一起回滚
+            }
+            log($"After rollback: {await Db.Northwind.IxScalarAsync("SELECT UnitsInStock FROM Products WHERE ProductID=7", id)}");
         }
 
         // ReSharper disable UnusedVariable
@@ -134,29 +196,15 @@ namespace cmstar.Data
 
     public static class Db
     {
-        private static readonly Dictionary<string, IDbClient> KnownClients = new Dictionary<string, IDbClient>();
+        private static readonly ConcurrentDictionary<string, IDbClientAsync> KnownClients
+            = new ConcurrentDictionary<string, IDbClientAsync>();
 
-        public static IDbClient Northwind
+        public static IDbClientAsync Northwind
+            => GetClient("Northwind", "server=.;database=Northwind;trusted_connection=true;");
+
+        private static IDbClientAsync GetClient(string name, string connectionString)
         {
-            get { return GetClient("Northwind", "server=.;database=Northwind;trusted_connection=true;"); }
-        }
-
-        private static IDbClient GetClient(string name, string connectionString)
-        {
-            IDbClient client;
-            if (KnownClients.TryGetValue(name, out client))
-                return client;
-
-            lock (KnownClients)
-            {
-                if (KnownClients.TryGetValue(name, out client))
-                    return client;
-
-                client = new SqlDbClient(connectionString);
-                KnownClients.Add(name, client);
-            }
-
-            return client;
+            return KnownClients.GetOrAdd(name, _ => new SqlDbClient(connectionString));
         }
     }
 }

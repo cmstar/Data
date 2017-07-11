@@ -42,11 +42,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractDbClient_Async.cs" />
     <Compile Include="ArgAssert.cs" />
     <Compile Include="AbstractDbClient.cs" />
     <Compile Include="DataExpiredException.cs" />
     <Compile Include="AbstractDataRecord.cs" />
     <Compile Include="DataRowRecord.cs" />
+    <Compile Include="DbClientHelper.cs" />
     <Compile Include="DbClientParamEx.cs" />
     <Compile Include="DbClientWrapper.cs" />
     <Compile Include="Dynamic\AnonymousObjectMapper.cs" />
@@ -54,8 +56,10 @@
     <Compile Include="Dynamic\CommandCache.cs" />
     <Compile Include="Dynamic\CommandIdentity.cs" />
     <Compile Include="Dynamic\DataTableConvert.cs" />
+    <Compile Include="IDbClientAsync.cs" />
     <Compile Include="IndexingExtension.cs" />
     <Compile Include="Dynamic\MapperParser.cs" />
+    <Compile Include="IndexingExtension_Async.cs" />
     <Compile Include="ObjectiveExtension.cs" />
     <Compile Include="Dynamic\DbTypeConvert.cs" />
     <Compile Include="Dynamic\ObjectMapper.cs" />
@@ -63,6 +67,7 @@
     <Compile Include="IMapper.cs" />
     <Compile Include="IncorrectResultSizeException.cs" />
     <Compile Include="ITransactionKeeper.cs" />
+    <Compile Include="ObjectiveExtension_Async.cs" />
     <Compile Include="Reflection\Emit\DelegateCache.cs" />
     <Compile Include="Reflection\ReflectionUtils.cs" />
     <Compile Include="ThreadLocalTransactionKeeper.cs" />

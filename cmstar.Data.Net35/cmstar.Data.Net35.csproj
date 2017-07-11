@@ -52,6 +52,9 @@
     <Compile Include="..\cmstar.Data\DataRowRecord.cs">
       <Link>DataRowRecord.cs</Link>
     </Compile>
+    <Compile Include="..\cmstar.Data\DbClientHelper.cs">
+      <Link>DbClientHelper.cs</Link>
+    </Compile>
     <Compile Include="..\cmstar.Data\DbClientParamEx.cs">
       <Link>DbClientParamEx.cs</Link>
     </Compile>

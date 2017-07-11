@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 
 namespace cmstar.Data
@@ -9,6 +10,8 @@ namespace cmstar.Data
     /// <summary>
     /// 与线程绑定有关的<see cref="ITransactionKeeper"/>的实现。
     /// 控制一个线程中获取到的实例总是同一个，使事务嵌套的情况下，内层申明的事务实际上跑在外层的实例作用域中。
+    /// 嵌套事务绑定在当前的代码执行路径（CallContext）上，若将同一实例传递到在多个不同执行路径的线程内，每个
+    /// 线程中调用<see cref="OpenTransaction"/>方法，都将开启一个独立的新事务。
     /// 类型的实例成员并不是线程安全的。 
     /// </summary>
     /// <remarks>
@@ -18,8 +21,8 @@ namespace cmstar.Data
     /// </remarks>
     public class ThreadLocalTransactionKeeper : AbstractDbClient, ITransactionKeeper
     {
-        private static readonly Dictionary<int, ThreadLocalTransactionKeeper> Keepers
-            = new Dictionary<int, ThreadLocalTransactionKeeper>();
+        private const string CallContextName = "CORE_DATA_TRANSACTION_THREADLOCAL";
+        private static readonly object SyncBlock = new object();
 
         /// <summary>
         /// 获取绑定到当前线程的<see cref="ThreadLocalTransactionKeeper"/>实例。
@@ -30,52 +33,49 @@ namespace cmstar.Data
         public static ThreadLocalTransactionKeeper OpenTransaction(
             DbProviderFactory dbProviderFactory, string connectionString)
         {
-            var theadId = Thread.CurrentThread.ManagedThreadId;
             ThreadLocalTransactionKeeper keeper;
 
-            lock (Keepers)
+            // 为了支持事务嵌套（一个事务上再开一个事务），在同一个线程中每次访问 OpenTransaction 都应该获得
+            // 同一个事务实例，并记录嵌套级别；Commit 方法仅当嵌套级别为0时才真正提交。
+            // 这个事务实例一般是绑定在当前执行线程上的，但在调用异步（async）代码后，线程可能切换，为了支持
+            // 异步调用下的正常访问，这里通过 CallContext.LogicalGetData/LogicalSetData 设置与找回事务实例。
+
+            lock (SyncBlock)
             {
-                if (Keepers.TryGetValue(theadId, out keeper))
+                keeper = (ThreadLocalTransactionKeeper)CallContext.LogicalGetData(CallContextName);
+                if (keeper == null)
                 {
-                    keeper._embeddedLevel++;
+                    keeper = new ThreadLocalTransactionKeeper(dbProviderFactory, connectionString);
+                    CallContext.LogicalSetData(CallContextName, keeper);
                 }
                 else
                 {
-                    keeper = new ThreadLocalTransactionKeeper(dbProviderFactory, connectionString);
-                    Keepers.Add(theadId, keeper);
+                    // 增加事务嵌套层级计数。
+                    keeper._embeddedLevel++;
                 }
             }
 
             return keeper;
         }
 
-        private static void RemoveLocalTransactionKeeper()
-        {
-            lock (Keepers)
-            {
-                Keepers.Remove(Thread.CurrentThread.ManagedThreadId);
-            }
-        }
-
         private readonly object _syncRoot = new object();
-        private readonly DbProviderFactory _factory;
-        private readonly string _connectionString;
 
         private DbTransaction _transaction;
         private DbConnection _connection;
         private bool _transactionCompleted;
-        private bool _disposed;
-        private int _embeddedLevel;
+        private bool _disposed; // Dispose 方法是否已经执行过
+        private int _embeddedLevel; // 事务的嵌套层级，刚创建的事务值为0，事务内再创建则+1
 
         private ThreadLocalTransactionKeeper(DbProviderFactory dbProviderFactory, string connectionString)
         {
-            ArgAssert.NotNull(dbProviderFactory, "dbProviderFactory");
-            ArgAssert.NotNullOrEmptyOrWhitespace(connectionString, "connectionString");
+            ArgAssert.NotNull(dbProviderFactory, nameof(dbProviderFactory));
+            ArgAssert.NotNullOrEmptyOrWhitespace(connectionString, nameof(connectionString));
 
-            _factory = dbProviderFactory;
-            _connectionString = connectionString;
+            Factory = dbProviderFactory;
+            ConnectionString = connectionString;
         }
 
+        /// <inheritdoc />
         ~ThreadLocalTransactionKeeper()
         {
             Dispose(false);
@@ -84,18 +84,12 @@ namespace cmstar.Data
         /// <summary>
         /// 获取当前实例所使用的数据库连接字符串。
         /// </summary>
-        public override string ConnectionString
-        {
-            get { return _connectionString; }
-        }
+        public override string ConnectionString { get; }
 
         /// <summary>
         /// 获取当前实例所使用的<see cref="DbProviderFactory"/>实例。
         /// </summary>
-        protected override DbProviderFactory Factory
-        {
-            get { return _factory; }
-        }
+        protected override DbProviderFactory Factory { get; }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -154,10 +148,10 @@ namespace cmstar.Data
         private void ValidateStatus()
         {
             if (_connection.State == ConnectionState.Closed || _connection.State == ConnectionState.Broken)
-                throw new InvalidOperationException("连接已关闭。");
+                throw new InvalidOperationException("The database connction was closed.");
 
             if (_transactionCompleted)
-                throw new InvalidOperationException("事务已结束。");
+                throw new InvalidOperationException("The transaction was finished.");
 
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
@@ -189,19 +183,19 @@ namespace cmstar.Data
             }
             finally
             {
-                RemoveLocalTransactionKeeper();
-
                 //显式释放资源时，阻止GC调用Finalize方法
                 if (disposing)
                     GC.SuppressFinalize(this);
             }
         }
 
+        /// <inheritdoc cref="AbstractDbClient.CreateConnection" />
         protected override DbConnection CreateConnection()
         {
             return LocalConnection();
         }
 
+        /// <inheritdoc cref="AbstractDbClient.OpenConnection" />
         protected override void OpenConnection(DbConnection connection)
         {
             lock (_syncRoot)
@@ -210,11 +204,13 @@ namespace cmstar.Data
             }
         }
 
+        /// <inheritdoc cref="AbstractDbClient.CloseConnection" />
         protected override void CloseConnection(DbConnection connection)
         {
             //连接在Dispose时关闭，此处什么也不做
         }
 
+        /// <inheritdoc cref="AbstractDbClient.CreateCommand" />
         protected override DbCommand CreateCommand(string sql,
             DbConnection connection, IEnumerable<DbParameter> parameters,
             CommandType commandType, int timeout)
