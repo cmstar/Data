@@ -43,7 +43,12 @@ namespace cmstar.Data
             lock (SyncBlock)
             {
                 keeper = (ThreadLocalTransactionKeeper)CallContext.LogicalGetData(CallContextName);
-                if (keeper == null)
+
+                // 同一个上下文（CallContext）的代码可能重复的开启关闭多次事务，每次提交或回滚后，再次开启新
+                // 事务时，应创建新的实例，避免拿到之前已经 Dispose 的实例。
+                // 虽然 Dispose 时会将 CallContext 里的引用清理掉，但每个方法的文档都说*可能会*抛出异常，为了
+                // 防止没有成功清理，这里也判断一下 _disposed 字段的值。
+                if (keeper == null || keeper._disposed)
                 {
                     keeper = new ThreadLocalTransactionKeeper(dbProviderFactory, connectionString);
                     CallContext.LogicalSetData(CallContextName, keeper);
@@ -178,11 +183,14 @@ namespace cmstar.Data
                 //关闭数据库连接，若此时事务未完成，则会被数据库回滚
                 if (LocalConnectionInitialized())
                     _connection.Dispose();
-
-                _disposed = true;
             }
             finally
             {
+                _disposed = true;
+
+                // 用完后，需要从 CallContext 里清理掉当前对象的引用，否则引用会被一直保持着。
+                CallContext.LogicalSetData(CallContextName, null);
+
                 //显式释放资源时，阻止GC调用Finalize方法
                 if (disposing)
                     GC.SuppressFinalize(this);
