@@ -13,13 +13,13 @@ namespace cmstar.Data
         /// 获取查询的第一行第一列的值。
         /// 这是一个异步操作。
         /// </summary>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>查询结果的第一行第一列的值。若查询结果行数为0，返回<c>null</c>。</returns>
-        public static async Task<object> ScalarAsync(this IDbClientAsync client,
+        public static async Task<object> ScalarAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
@@ -30,13 +30,13 @@ namespace cmstar.Data
         /// 执行非查询SQL语句，并返回所影响的行数。
         /// 这是一个异步操作。
         /// </summary>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>SQL所影响的行数。</returns>
-        public static async Task<int> ExecuteAsync(this IDbClientAsync client,
+        public static async Task<int> ExecuteAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
@@ -47,14 +47,14 @@ namespace cmstar.Data
         /// 执行非查询SQL语句，并断言所影响的行数。若影响的函数不正确，抛出异常。
         /// 这是一个异步操作。
         /// </summary>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="expectedSize">被断言的影响行数。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
-        public static async Task SizedExecuteAsync(this IDbClientAsync client,
+        public static async Task SizedExecuteAsync(this IDbClient client,
             int expectedSize, string sql, object param,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
@@ -66,13 +66,13 @@ namespace cmstar.Data
         /// 返回查询语句对应查询结果的<see cref="System.Data.DataTable"/>。
         /// 这是一个异步操作。
         /// </summary>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
-        public static async Task<DataTable> DataTableAsync(this IDbClientAsync client,
+        public static async Task<DataTable> DataTableAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
@@ -83,13 +83,13 @@ namespace cmstar.Data
         /// 返回查询语句对应查询结果的<see cref="System.Data.DataSet"/>。
         /// 这是一个异步操作。
         /// </summary>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
-        public static async Task<DataSet> DataSetAsync(this IDbClientAsync client,
+        public static async Task<DataSet> DataSetAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
@@ -100,13 +100,13 @@ namespace cmstar.Data
         /// 判断给定的查询的结果是否至少包含1行。
         /// 这是一个异步操作。
         /// </summary>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>若查询结果至少包含1行，返回<c>true</c>；否则返回<c>false</c>。</returns>
-        public static async Task<bool> ExistsAsync(this IDbClientAsync client,
+        public static async Task<bool> ExistsAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
@@ -118,13 +118,13 @@ namespace cmstar.Data
         /// 若查询命中的行数为0，返回null。
         /// 这是一个异步操作。
         /// </summary>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns><see cref="IDataRecord"/>的实现，包含查询的第一行记录。</returns>
-        public static async Task<IDataRecord> GetRowAsync(this IDbClientAsync client,
+        public static async Task<IDataRecord> GetRowAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
@@ -136,13 +136,13 @@ namespace cmstar.Data
         /// 数组元素顺序与列顺序一致。若查询命中的行数为0，返回null。
         /// 这是一个异步操作。
         /// </summary>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>包含了各列的值的数组。</returns>
-        public static async Task<object[]> ItemArrayAsync(this IDbClientAsync client,
+        public static async Task<object[]> ItemArrayAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
@@ -155,14 +155,14 @@ namespace cmstar.Data
         /// 这是一个异步操作。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="mapper"><see cref="IMapper{T}"/>的实例。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
-        public static async Task<T> GetAsync<T>(this IDbClientAsync client,
+        public static async Task<T> GetAsync<T>(this IDbClient client,
             IMapper<T> mapper, string sql, object param,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
@@ -176,7 +176,7 @@ namespace cmstar.Data
         /// 这是一个异步操作。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="mapper"><see cref="IMapper{T}"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
@@ -184,7 +184,7 @@ namespace cmstar.Data
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
-        public static async Task<T> ForceGetAsync<T>(this IDbClientAsync client,
+        public static async Task<T> ForceGetAsync<T>(this IDbClient client,
             IMapper<T> mapper, string sql, object param,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
@@ -201,7 +201,7 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>查询结果得行序列。</returns>
-        public static async Task<IEnumerable<IDataRecord>> RowsAsync(this IDbClientAsync client,
+        public static async Task<IEnumerable<IDataRecord>> RowsAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
@@ -213,14 +213,14 @@ namespace cmstar.Data
         /// 这是一个异步操作。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="mapper"><see cref="IMapper{T}"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例的集合。若查询命中的行数为0，返回空集合。</returns>
-        public static async Task<IList<T>> ListAsync<T>(this IDbClientAsync client,
+        public static async Task<IList<T>> ListAsync<T>(this IDbClient client,
             IMapper<T> mapper, string sql, object param,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
@@ -234,13 +234,13 @@ namespace cmstar.Data
         /// 这是一个异步操作。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
-        public static async Task<T> GetAsync<T>(this IDbClientAsync client,
+        public static async Task<T> GetAsync<T>(this IDbClient client,
             string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var paramType = param?.GetType();
@@ -273,14 +273,14 @@ namespace cmstar.Data
         /// 这是一个异步操作。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
-        public static async Task<T> ForceGetAsync<T>(this IDbClientAsync client,
+        public static async Task<T> ForceGetAsync<T>(this IDbClient client,
             string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var paramType = param?.GetType();
@@ -315,14 +315,14 @@ namespace cmstar.Data
         /// 这是一个异步操作。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="template">用于指定目标类型的模板对象。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例集合。</returns>
-        public static async Task<IList<T>> TemplateListAsync<T>(this IDbClientAsync client,
+        public static async Task<IList<T>> TemplateListAsync<T>(this IDbClient client,
             T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             return (await QueryAsync<T>(client, sql, param, commandType, timeout)).ToList();
@@ -333,13 +333,13 @@ namespace cmstar.Data
         /// 这是一个异步操作。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例集合。</returns>
-        public static async Task<IList<T>> ListAsync<T>(this IDbClientAsync client,
+        public static async Task<IList<T>> ListAsync<T>(this IDbClient client,
             string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             return (await QueryAsync<T>(client, sql, param, commandType, timeout)).ToList();
@@ -349,14 +349,14 @@ namespace cmstar.Data
         /// 查询并根据结果返回目标类型的实例序列，由一个模板对象指定目标类型。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="template">用于指定目标类型的模板对象。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例序列。</returns>
-        public static async Task<IEnumerable<T>> TemplateQueryAsync<T>(this IDbClientAsync client,
+        public static async Task<IEnumerable<T>> TemplateQueryAsync<T>(this IDbClient client,
             T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             return await QueryAsync<T>(client, sql, param, commandType, timeout);
@@ -366,13 +366,13 @@ namespace cmstar.Data
         /// 查询并根据结果返回目标类型的实例序列。
         /// </summary>
         /// <typeparam name="T">查询的目标类型。</typeparam>
-        /// <param name="client"><see cref="IDbClientAsync"/>的实例。</param>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
         /// <param name="sql">SQL语句。</param>
         /// <param name="param">记录SQL参数的对象。</param>
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例序列。</returns>
-        public static async Task<IEnumerable<T>> QueryAsync<T>(this IDbClientAsync client,
+        public static async Task<IEnumerable<T>> QueryAsync<T>(this IDbClient client,
             string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var paramType = param?.GetType();

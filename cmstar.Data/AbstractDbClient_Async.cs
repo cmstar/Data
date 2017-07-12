@@ -10,7 +10,7 @@ namespace cmstar.Data
     /// <see cref="IDbClient"/>的基本实现。
     /// 这是一个抽象类。
     /// </summary>
-    public abstract partial class AbstractDbClient : IDbClientAsync
+    public abstract partial class AbstractDbClient
     {
         /// <summary>
         /// 获取查询的第一行第一列的值。

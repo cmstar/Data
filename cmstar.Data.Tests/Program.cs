@@ -196,13 +196,13 @@ namespace cmstar.Data
 
     public static class Db
     {
-        private static readonly ConcurrentDictionary<string, IDbClientAsync> KnownClients
-            = new ConcurrentDictionary<string, IDbClientAsync>();
+        private static readonly ConcurrentDictionary<string, IDbClient> KnownClients
+            = new ConcurrentDictionary<string, IDbClient>();
 
-        public static IDbClientAsync Northwind
+        public static IDbClient Northwind
             => GetClient("Northwind", "server=.;database=Northwind;trusted_connection=true;");
 
-        private static IDbClientAsync GetClient(string name, string connectionString)
+        private static IDbClient GetClient(string name, string connectionString)
         {
             return KnownClients.GetOrAdd(name, _ => new SqlDbClient(connectionString));
         }

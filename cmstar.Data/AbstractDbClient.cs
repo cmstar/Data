@@ -12,7 +12,7 @@ namespace cmstar.Data
 #if NET35
     public abstract class AbstractDbClient : IDbClient
 #else
-    public abstract partial class AbstractDbClient
+    public abstract partial class AbstractDbClient : IDbClient
 #endif
     {
         /// <summary>

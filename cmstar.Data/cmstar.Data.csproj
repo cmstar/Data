@@ -50,13 +50,14 @@
     <Compile Include="DataRowRecord.cs" />
     <Compile Include="DbClientHelper.cs" />
     <Compile Include="DbClientParamEx.cs" />
+    <Compile Include="DbClientWrapper_Async.cs" />
     <Compile Include="DbClientWrapper.cs" />
     <Compile Include="Dynamic\AnonymousObjectMapper.cs" />
     <Compile Include="Dynamic\CommandCacheItem.cs" />
     <Compile Include="Dynamic\CommandCache.cs" />
     <Compile Include="Dynamic\CommandIdentity.cs" />
     <Compile Include="Dynamic\DataTableConvert.cs" />
-    <Compile Include="IDbClientAsync.cs" />
+    <Compile Include="IDbClient_Async.cs" />
     <Compile Include="IndexingExtension.cs" />
     <Compile Include="Dynamic\MapperParser.cs" />
     <Compile Include="IndexingExtension_Async.cs" />

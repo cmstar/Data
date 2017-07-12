@@ -8,7 +8,11 @@ namespace cmstar.Data
     /// <summary>
     /// 定义数据库访问客户端。
     /// </summary>
+#if NET35
     public interface IDbClient
+#else
+    public partial interface IDbClient
+#endif
     {
         /// <summary>
         /// 获取当前实例所使用的数据库连接字符串。
