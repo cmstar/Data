@@ -23,7 +23,7 @@ namespace cmstar.Data
         /// <returns>查询结果的第一行第一列的值。若查询结果行数为0，返回<c>null</c>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public async Task<object> ScalarAsync(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual async Task<object> ScalarAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
@@ -58,7 +58,7 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
-        public async Task<int> ExecuteAsync(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual async Task<int> ExecuteAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
@@ -94,7 +94,7 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
-        public async Task SizedExecuteAsync(int expectedSize,
+        public virtual async Task SizedExecuteAsync(int expectedSize,
             string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
@@ -114,7 +114,7 @@ namespace cmstar.Data
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public async Task<DataTable> DataTableAsync(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual async Task<DataTable> DataTableAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
@@ -155,7 +155,7 @@ namespace cmstar.Data
         /// <returns>表示查询结果的<see cref="System.Data.DataSet"/>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public async Task<DataSet> DataSetAsync(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual async Task<DataSet> DataSetAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
@@ -195,7 +195,7 @@ namespace cmstar.Data
         /// <returns>若查询结果至少包含1行，返回<c>true</c>；否则返回<c>false</c>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public async Task<bool> ExistsAsync(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual async Task<bool> ExistsAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             return await ScalarAsync(sql, parameters, commandType, timeout) != null;
@@ -217,7 +217,7 @@ namespace cmstar.Data
         /// 区别于<see cref="DbCommand.ExecuteReader()"/>的用法，此方法执行完毕后将并不保持数据库连接，
         /// 也不需要调用<see cref="IDisposable.Dispose"/>。
         /// </remarks>
-        public async Task<IDataRecord> GetRowAsync(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual async Task<IDataRecord> GetRowAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             return await GetAsync(SingleRowKeeperMapper.Instance, sql, parameters, commandType, timeout);
@@ -235,7 +235,7 @@ namespace cmstar.Data
         /// <returns>包含了各列的值的数组。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public async Task<object[]> ItemArrayAsync(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual async Task<object[]> ItemArrayAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             return await GetAsync(ItemArrayMapper.Instance, sql, parameters, commandType, timeout);
@@ -253,7 +253,7 @@ namespace cmstar.Data
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <param name="mapper"><see cref="IMapper{T}"/>的实例。</param>
         /// <returns>目标类型的实例。</returns>
-        public async Task<T> GetAsync<T>(IMapper<T> mapper, string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual async Task<T> GetAsync<T>(IMapper<T> mapper, string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
@@ -298,7 +298,7 @@ namespace cmstar.Data
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
-        public async Task<T> ForceGetAsync<T>(IMapper<T> mapper,
+        public virtual async Task<T> ForceGetAsync<T>(IMapper<T> mapper,
             string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
@@ -346,7 +346,7 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例的集合。若查询命中的行数为0，返回空集合。</returns>
-        public async Task<IList<T>> ListAsync<T>(IMapper<T> mapper,
+        public virtual async Task<IList<T>> ListAsync<T>(IMapper<T> mapper,
             string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
@@ -388,7 +388,7 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>查询结果得行序列。</returns>
-        public async Task<IEnumerable<IDataRecord>> RowsAsync(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual async Task<IEnumerable<IDataRecord>> RowsAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));

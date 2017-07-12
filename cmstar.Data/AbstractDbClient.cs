@@ -35,7 +35,7 @@ namespace cmstar.Data
         /// <returns>查询结果的第一行第一列的值。若查询结果行数为0，返回<c>null</c>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public object Scalar(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual object Scalar(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
@@ -69,7 +69,7 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
-        public int Execute(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual int Execute(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
@@ -104,7 +104,7 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
-        public void SizedExecute(int expectedSize,
+        public virtual void SizedExecute(int expectedSize,
             string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
@@ -123,7 +123,7 @@ namespace cmstar.Data
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public DataTable DataTable(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual DataTable DataTable(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
@@ -159,7 +159,7 @@ namespace cmstar.Data
         /// <returns>表示查询结果的<see cref="System.Data.DataSet"/>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public DataSet DataSet(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual DataSet DataSet(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
@@ -195,7 +195,7 @@ namespace cmstar.Data
         /// <returns>若查询结果至少包含1行，返回<c>true</c>；否则返回<c>false</c>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public bool Exists(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual bool Exists(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             return Scalar(sql, parameters, commandType, timeout) != null;
@@ -216,7 +216,7 @@ namespace cmstar.Data
         /// 区别于<see cref="DbCommand.ExecuteReader()"/>的用法，此方法执行完毕后将并不保持数据库连接，
         /// 也不需要调用<see cref="IDisposable.Dispose"/>。
         /// </remarks>
-        public IDataRecord GetRow(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual IDataRecord GetRow(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             return Get(SingleRowKeeperMapper.Instance, sql, parameters, commandType, timeout);
@@ -233,7 +233,7 @@ namespace cmstar.Data
         /// <returns>包含了各列的值的数组。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public object[] ItemArray(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual object[] ItemArray(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             return Get(ItemArrayMapper.Instance, sql, parameters, commandType, timeout);
@@ -250,7 +250,7 @@ namespace cmstar.Data
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <param name="mapper"><see cref="IMapper{T}"/>的实例。</param>
         /// <returns>目标类型的实例。</returns>
-        public T Get<T>(IMapper<T> mapper, string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual T Get<T>(IMapper<T> mapper, string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
@@ -294,7 +294,7 @@ namespace cmstar.Data
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
-        public T ForceGet<T>(IMapper<T> mapper,
+        public virtual T ForceGet<T>(IMapper<T> mapper,
             string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
@@ -344,7 +344,7 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例的集合。若查询命中的行数为0，返回空集合。</returns>
-        public IList<T> List<T>(IMapper<T> mapper,
+        public virtual IList<T> List<T>(IMapper<T> mapper,
             string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
@@ -385,7 +385,7 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>查询结果得行序列。</returns>
-        public IEnumerable<IDataRecord> Rows(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual IEnumerable<IDataRecord> Rows(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
