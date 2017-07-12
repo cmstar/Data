@@ -19,7 +19,7 @@ namespace cmstar.Data
         /// 获取或设置默认的命令执行超时时间。当访问数据库的方法没有指定命令执行的超时时间（即
         /// <see cref="DbCommand.CommandTimeout"/>）时，使用此超时时间。各方法通常有 timeout 参数用于指定超时
         /// 时间，当值为0时即套用此属性的值作为超时时间。
-        /// 初始值为0（不限制）。
+        /// 单位为秒，初始值为0（不限制）。
         /// </summary>
         public virtual int DefaultTimeout { get; set; } = 0;
 
