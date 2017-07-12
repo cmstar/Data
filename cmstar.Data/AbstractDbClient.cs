@@ -16,6 +16,14 @@ namespace cmstar.Data
 #endif
     {
         /// <summary>
+        /// 获取或设置默认的命令执行超时时间。当访问数据库的方法没有指定命令执行的超时时间（即
+        /// <see cref="DbCommand.CommandTimeout"/>）时，使用此超时时间。各方法通常有 timeout 参数用于指定超时
+        /// 时间，当值为0时即套用此属性的值作为超时时间。
+        /// 初始值为0（不限制）。
+        /// </summary>
+        public virtual int DefaultTimeout { get; set; } = 0;
+
+        /// <summary>
         /// 获取当前实例所使用的数据库连接字符串。
         /// </summary>
         public abstract string ConnectionString { get; }
@@ -31,7 +39,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <returns>查询结果的第一行第一列的值。若查询结果行数为0，返回<c>null</c>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
@@ -67,7 +75,7 @@ namespace cmstar.Data
         /// <param name="sql">非查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
         public virtual int Execute(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
@@ -102,7 +110,7 @@ namespace cmstar.Data
         /// <param name="sql">非查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
         public virtual void SizedExecute(int expectedSize,
             string sql, IEnumerable<DbParameter> parameters = null,
@@ -119,7 +127,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
@@ -155,7 +163,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataSet"/>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
@@ -191,7 +199,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <returns>若查询结果至少包含1行，返回<c>true</c>；否则返回<c>false</c>。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
@@ -208,7 +216,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <returns><see cref="IDataRecord"/>的实现，包含查询的第一行记录。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
@@ -229,7 +237,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <returns>包含了各列的值的数组。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
@@ -247,7 +255,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <param name="mapper"><see cref="IMapper{T}"/>的实例。</param>
         /// <returns>目标类型的实例。</returns>
         public virtual T Get<T>(IMapper<T> mapper, string sql, IEnumerable<DbParameter> parameters = null,
@@ -291,7 +299,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
         public virtual T ForceGet<T>(IMapper<T> mapper,
@@ -342,7 +350,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <returns>目标类型的实例的集合。若查询命中的行数为0，返回空集合。</returns>
         public virtual IList<T> List<T>(IMapper<T> mapper,
             string sql, IEnumerable<DbParameter> parameters = null,
@@ -383,7 +391,7 @@ namespace cmstar.Data
         /// <param name="sql">查询SQL。</param>
         /// <param name="parameters">参数序列。空序列或null表示没有参数。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <returns>查询结果得行序列。</returns>
         public virtual IEnumerable<IDataRecord> Rows(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
@@ -422,7 +430,7 @@ namespace cmstar.Data
         /// <returns><see cref="ITransactionKeeper"/>。</returns>
         public virtual ITransactionKeeper CreateTransaction()
         {
-            return ThreadLocalTransactionKeeper.OpenTransaction(Factory, ConnectionString);
+            return ThreadLocalTransactionKeeper.OpenTransaction(Factory, ConnectionString, DefaultTimeout);
         }
 
         /// <summary>
@@ -459,7 +467,7 @@ namespace cmstar.Data
         /// <param name="connection">数据库连接。</param>
         /// <param name="parameters">数据库参数的序列。</param>
         /// <param name="commandType">命令的类型。</param>
-        /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
+        /// <param name="timeout">命令的超时时间，单位毫秒。0表示不指定，此时套用默认的超时设置。</param>
         /// <returns><see cref="DbCommand"/>的实例。</returns>
         protected virtual DbCommand CreateCommand(string commandText,
             DbConnection connection, IEnumerable<DbParameter> parameters,
@@ -469,7 +477,9 @@ namespace cmstar.Data
 
             cmd.CommandType = commandType;
             cmd.CommandText = commandText;
-            cmd.CommandTimeout = timeout;
+
+            // timeout 为0时套用默认超时。
+            cmd.CommandTimeout = timeout == 0 ? DefaultTimeout : timeout;
 
             if (parameters != null)
             {

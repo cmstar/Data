@@ -18,13 +18,18 @@ namespace cmstar.Data
         /// </summary>
         /// <param name="dbProviderFactory"><see cref="DbProviderFactory"/>的实例。</param>
         /// <param name="connectionString">指定数据库的连接字符串。</param>
-        public TransactionScopeTransactionKeeper(DbProviderFactory dbProviderFactory, string connectionString)
+        /// <param name="commandTimeout">
+        /// 指定事务内的命令的默认执行超时时间，当方法没有单独制定超时时，套用此超时值。
+        /// </param>
+        public TransactionScopeTransactionKeeper(
+            DbProviderFactory dbProviderFactory, string connectionString, int commandTimeout)
         {
             ArgAssert.NotNull(dbProviderFactory, "dbProviderFactory");
             ArgAssert.NotNullOrEmptyOrWhitespace(connectionString, "connectionString");
 
             Factory = dbProviderFactory;
             ConnectionString = connectionString;
+            DefaultTimeout = commandTimeout;
 
             //鉴于应用场景，直接开启事务控制（不过数据库连接还没初始化）
             _tran = new TransactionScope();

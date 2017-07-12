@@ -29,9 +29,12 @@ namespace cmstar.Data
         /// </summary>
         /// <param name="dbProviderFactory"><see cref="DbProviderFactory"/>实例。</param>
         /// <param name="connectionString">初始化数据库连接的连接字符串。</param>
+        /// <param name="commandTimeout">
+        /// 指定事务内的命令的默认执行超时时间，当方法没有单独制定超时时，套用此超时值。
+        /// </param>
         /// <returns><see cref="ThreadLocalTransactionKeeper"/>实例。</returns>
         public static ThreadLocalTransactionKeeper OpenTransaction(
-            DbProviderFactory dbProviderFactory, string connectionString)
+            DbProviderFactory dbProviderFactory, string connectionString, int commandTimeout)
         {
             ThreadLocalTransactionKeeper keeper;
 
@@ -50,7 +53,7 @@ namespace cmstar.Data
                 // 防止没有成功清理，这里也判断一下 _disposed 字段的值。
                 if (keeper == null || keeper._disposed)
                 {
-                    keeper = new ThreadLocalTransactionKeeper(dbProviderFactory, connectionString);
+                    keeper = new ThreadLocalTransactionKeeper(dbProviderFactory, connectionString, commandTimeout);
                     CallContext.LogicalSetData(CallContextName, keeper);
                 }
                 else
@@ -71,13 +74,15 @@ namespace cmstar.Data
         private bool _disposed; // Dispose 方法是否已经执行过
         private int _embeddedLevel; // 事务的嵌套层级，刚创建的事务值为0，事务内再创建则+1
 
-        private ThreadLocalTransactionKeeper(DbProviderFactory dbProviderFactory, string connectionString)
+        private ThreadLocalTransactionKeeper(
+            DbProviderFactory dbProviderFactory, string connectionString, int commandTimeout)
         {
             ArgAssert.NotNull(dbProviderFactory, nameof(dbProviderFactory));
             ArgAssert.NotNullOrEmptyOrWhitespace(connectionString, nameof(connectionString));
 
             Factory = dbProviderFactory;
             ConnectionString = connectionString;
+            DefaultTimeout = commandTimeout;
         }
 
         /// <inheritdoc />
