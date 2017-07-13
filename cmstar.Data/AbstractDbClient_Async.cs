@@ -217,10 +217,10 @@ namespace cmstar.Data
         /// 区别于<see cref="DbCommand.ExecuteReader()"/>的用法，此方法执行完毕后将并不保持数据库连接，
         /// 也不需要调用<see cref="IDisposable.Dispose"/>。
         /// </remarks>
-        public virtual async Task<IDataRecord> GetRowAsync(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual Task<IDataRecord> GetRowAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return await GetAsync(SingleRowKeeperMapper.Instance, sql, parameters, commandType, timeout);
+            return GetAsync(SingleRowKeeperMapper.Instance, sql, parameters, commandType, timeout);
         }
 
         /// <summary>
@@ -235,10 +235,10 @@ namespace cmstar.Data
         /// <returns>包含了各列的值的数组。</returns>
         /// <exception cref="ArgumentNullException">当<paramref name="sql"/>为<c>null</c>。</exception>
         /// <exception cref="ArgumentException">当<paramref name="sql"/>长度为0。</exception>
-        public virtual async Task<object[]> ItemArrayAsync(string sql, IEnumerable<DbParameter> parameters = null,
+        public virtual Task<object[]> ItemArrayAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return await GetAsync(ItemArrayMapper.Instance, sql, parameters, commandType, timeout);
+            return GetAsync(ItemArrayMapper.Instance, sql, parameters, commandType, timeout);
         }
 
         /// <summary>

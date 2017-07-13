@@ -9,7 +9,7 @@ namespace cmstar.Data
     /// </summary>
     internal class SingleRowKeeperMapper : IMapper<SingleRowKeeper>
     {
-        public static readonly SingleRowKeeperMapper Instance = new SingleRowKeeperMapper();
+        public static readonly IMapper<IDataRecord> Instance = new SingleRowKeeperMapper();
 
         private SingleRowKeeperMapper() { }
 
@@ -38,7 +38,7 @@ namespace cmstar.Data
         /// </param>
         public SingleRowKeeper(IDataRecord dataRecord)
         {
-            ArgAssert.NotNull(dataRecord, "dataRecord");
+            ArgAssert.NotNull(dataRecord, nameof(dataRecord));
 
             var fieldCount = dataRecord.FieldCount;
             _fieldCount = fieldCount;
@@ -56,10 +56,7 @@ namespace cmstar.Data
             }
         }
 
-        public override int FieldCount
-        {
-            get { return _fieldCount; }
-        }
+        public override int FieldCount => _fieldCount;
 
         public override string GetName(int i)
         {
@@ -75,7 +72,7 @@ namespace cmstar.Data
 
         public override int GetValues(object[] values)
         {
-            ArgAssert.NotNull(values, "values");
+            ArgAssert.NotNull(values, nameof(values));
 
             var num = Math.Min(values.Length, _fieldCount);
             Array.Copy(_values, values, num);
@@ -84,7 +81,7 @@ namespace cmstar.Data
 
         public override int GetOrdinal(string name)
         {
-            ArgAssert.NotNullOrEmpty(name, "name");
+            ArgAssert.NotNullOrEmpty(name, nameof(name));
 
             //根据列的数量选择是遍历列，还是构造列的哈希表进行检索
             return _fieldCount > 8 ? GetOrdinalByNameMap(name) : GetOrdinalByIteration(name);
@@ -137,7 +134,7 @@ namespace cmstar.Data
 
         public object[] MapRow(IDataRecord record, int rowNum)
         {
-            ArgAssert.NotNull(record, "record");
+            ArgAssert.NotNull(record, nameof(record));
 
             var len = record.FieldCount;
             var array = new object[len];

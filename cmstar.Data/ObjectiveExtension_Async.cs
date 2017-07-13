@@ -19,11 +19,11 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>查询结果的第一行第一列的值。若查询结果行数为0，返回<c>null</c>。</returns>
-        public static async Task<object> ScalarAsync(this IDbClient client,
+        public static Task<object> ScalarAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.ScalarAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.ScalarAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -36,11 +36,11 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>SQL所影响的行数。</returns>
-        public static async Task<int> ExecuteAsync(this IDbClient client,
+        public static Task<int> ExecuteAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.ExecuteAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.ExecuteAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -54,12 +54,12 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <exception cref="IncorrectResultSizeException">当影响的行数不正确。</exception>
-        public static async Task SizedExecuteAsync(this IDbClient client,
+        public static Task SizedExecuteAsync(this IDbClient client,
             int expectedSize, string sql, object param,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            await client.SizedExecuteAsync(expectedSize, cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.SizedExecuteAsync(expectedSize, cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -72,11 +72,11 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
-        public static async Task<DataTable> DataTableAsync(this IDbClient client,
+        public static Task<DataTable> DataTableAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.DataTableAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.DataTableAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -89,11 +89,11 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>表示查询结果的<see cref="System.Data.DataTable"/>。</returns>
-        public static async Task<DataSet> DataSetAsync(this IDbClient client,
+        public static Task<DataSet> DataSetAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.DataSetAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.DataSetAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -106,11 +106,11 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>若查询结果至少包含1行，返回<c>true</c>；否则返回<c>false</c>。</returns>
-        public static async Task<bool> ExistsAsync(this IDbClient client,
+        public static Task<bool> ExistsAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.ExistsAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.ExistsAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -124,11 +124,11 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns><see cref="IDataRecord"/>的实现，包含查询的第一行记录。</returns>
-        public static async Task<IDataRecord> GetRowAsync(this IDbClient client,
+        public static Task<IDataRecord> GetRowAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.GetRowAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.GetRowAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -142,11 +142,11 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>包含了各列的值的数组。</returns>
-        public static async Task<object[]> ItemArrayAsync(this IDbClient client,
+        public static Task<object[]> ItemArrayAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.ItemArrayAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.ItemArrayAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -162,12 +162,12 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
-        public static async Task<T> GetAsync<T>(this IDbClient client,
+        public static Task<T> GetAsync<T>(this IDbClient client,
             IMapper<T> mapper, string sql, object param,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.GetAsync(mapper, cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.GetAsync(mapper, cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -184,12 +184,12 @@ namespace cmstar.Data
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例。</returns>
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
-        public static async Task<T> ForceGetAsync<T>(this IDbClient client,
+        public static Task<T> ForceGetAsync<T>(this IDbClient client,
             IMapper<T> mapper, string sql, object param,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.ForceGetAsync(mapper, cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.ForceGetAsync(mapper, cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -201,11 +201,11 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>查询结果得行序列。</returns>
-        public static async Task<IEnumerable<IDataRecord>> RowsAsync(this IDbClient client,
+        public static Task<IEnumerable<IDataRecord>> RowsAsync(this IDbClient client,
             string sql, object param, CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.RowsAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.RowsAsync(cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -220,12 +220,12 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例的集合。若查询命中的行数为0，返回空集合。</returns>
-        public static async Task<IList<T>> ListAsync<T>(this IDbClient client,
+        public static Task<IList<T>> ListAsync<T>(this IDbClient client,
             IMapper<T> mapper, string sql, object param,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
             var cache = GetNoMapperCache(client, sql, param, commandType);
-            return await client.ListAsync(mapper, cache.Sql, cache.Params(client, param), commandType, timeout);
+            return client.ListAsync(mapper, cache.Sql, cache.Params(client, param), commandType, timeout);
         }
 
         /// <summary>
@@ -356,10 +356,10 @@ namespace cmstar.Data
         /// <param name="commandType">命令的类型。</param>
         /// <param name="timeout">命令的超时时间，单位毫秒。0为不指定。</param>
         /// <returns>目标类型的实例序列。</returns>
-        public static async Task<IEnumerable<T>> TemplateQueryAsync<T>(this IDbClient client,
+        public static Task<IEnumerable<T>> TemplateQueryAsync<T>(this IDbClient client,
             T template, string sql, object param = null, CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return await QueryAsync<T>(client, sql, param, commandType, timeout);
+            return QueryAsync<T>(client, sql, param, commandType, timeout);
         }
 
         /// <summary>
