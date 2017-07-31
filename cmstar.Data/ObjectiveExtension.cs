@@ -478,23 +478,29 @@ namespace cmstar.Data
 
             public void AddDbParameterInfo(string paramName, MemberInfo memberInfo)
             {
-                var isPropertyInfo = memberInfo is PropertyInfo;
-                var memberType = isPropertyInfo
-                    ? ((PropertyInfo)memberInfo).PropertyType
-                    : ((FieldInfo)memberInfo).FieldType;
-                var dbType = DbTypeConvert.LookupDbType(memberType);
-                if (dbType == DbTypeConvert.NotSupporteDbType)
+                Func<object, object> valueGetter;
+                Type memberType;
+
+                // 不是属性就必须是字段，不允许其他情况。
+                var propertyInfo = memberInfo as PropertyInfo;
+                if (propertyInfo == null)
                 {
-                    throw new NotSupportedException($"The type {memberType} can not be converted to a DbType.");
+                    var fieldInfo = (FieldInfo)memberInfo;
+                    valueGetter = FieldAccessorGenerator.CreateGetter(fieldInfo);
+                    memberType = fieldInfo.FieldType;
+                }
+                else
+                {
+                    valueGetter = PropertyAccessorGenerator.CreateGetter(propertyInfo);
+                    memberType = propertyInfo.PropertyType;
                 }
 
-                var info = new DbParameterInfo();
-                info.Name = paramName;
-                info.DbType = dbType;
-                info.IsString = memberType == typeof(string);
-                info.ValueGetter = isPropertyInfo
-                    ? PropertyAccessorGenerator.CreateGetter((PropertyInfo)memberInfo)
-                    : FieldAccessorGenerator.CreateGetter((FieldInfo)memberInfo);
+                var info = new DbParameterInfo
+                {
+                    Name = paramName,
+                    Type = memberType,
+                    ValueGetter = valueGetter
+                };
 
                 _parameterInfos.Add(info);
             }
@@ -506,26 +512,8 @@ namespace cmstar.Data
 
                 foreach (var p in _parameterInfos)
                 {
-                    var dbParam = client.CreateParameter();
-                    dbParam.ParameterName = p.Name;
-                    dbParam.DbType = p.DbType;
-
                     var value = p.ValueGetter(param);
-                    if (value == null)
-                    {
-                        dbParam.Value = DBNull.Value;
-                    }
-                    else
-                    {
-                        dbParam.Value = value;
-
-                        if (p.IsString && ((string)value).Length <= DbTypeConvert.DefaultStringSizeForDbParameter)
-                        {
-                            dbParam.Size = DbTypeConvert.DefaultStringSizeForDbParameter;
-                        }
-                    }
-
-                    yield return dbParam;
+                    yield return client.CreateParameter(p.Name, value, p.Type);
                 }
             }
         }
@@ -533,8 +521,7 @@ namespace cmstar.Data
         private class DbParameterInfo
         {
             public string Name;
-            public DbType DbType;
-            public bool IsString;
+            public Type Type;
             public Func<object, object> ValueGetter;
         }
     }

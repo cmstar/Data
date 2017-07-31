@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
@@ -329,41 +328,7 @@ namespace cmstar.Data
         {
             for (int i = 0; i < param.Length; i++)
             {
-                var value = param[i];
-                var p = value as DbParameter;
-
-                if (p != null)
-                    yield return p;
-
-                p = client.CreateParameter();
-                p.ParameterName = i.ToString(CultureInfo.InvariantCulture);
-
-                if (value == null)
-                {
-                    p.Value = DBNull.Value;
-                    p.DbType = DbType.AnsiString;
-                    p.Size = 1;
-                }
-                else
-                {
-                    var dbType = DbTypeConvert.LookupDbType(value.GetType());
-
-                    if (dbType == DbTypeConvert.NotSupporteDbType)
-                    {
-                        throw new NotSupportedException($"The type {value.GetType()} can not be converted to a DbType.");
-                    }
-
-                    p.Value = value;
-                    p.DbType = dbType;
-
-                    var stringValue = value as string;
-                    if (stringValue != null && stringValue.Length <= DbTypeConvert.DefaultStringSizeForDbParameter)
-                    {
-                        p.Size = DbTypeConvert.DefaultStringSizeForDbParameter;
-                    }
-                }
-
-                yield return p;
+                yield return client.CreateParameter(i.ToString(CultureInfo.InvariantCulture), param[i]);
             }
         }
     }
