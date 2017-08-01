@@ -61,6 +61,9 @@
     <Compile Include="..\cmstar.Data\DbClientWrapper.cs">
       <Link>DbClientWrapper.cs</Link>
     </Compile>
+    <Compile Include="..\cmstar.Data\DbString.cs">
+      <Link>DbString.cs</Link>
+    </Compile>
     <Compile Include="..\cmstar.Data\Dynamic\AnonymousObjectMapper.cs">
       <Link>Dynamic\AnonymousObjectMapper.cs</Link>
     </Compile>
