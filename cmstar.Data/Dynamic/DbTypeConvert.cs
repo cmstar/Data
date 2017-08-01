@@ -7,7 +7,7 @@ namespace cmstar.Data.Dynamic
     /// <summary>
     /// Provides methods for converting CLR types to DbTypes.
     /// </summary>
-    internal class DbTypeConvert
+    public class DbTypeConvert
     {
         /// <summary>
         /// This value will be used for DbParameter.Size when the DbParameter.Value is string 
