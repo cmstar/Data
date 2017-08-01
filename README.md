@@ -82,7 +82,7 @@
 
 现在可以创建MySql的访问客户端了：
 
-	IDbClient client = new MysqlDbClient("server=.;database=MySqlDb;uid=user;pwd=password");
+    IDbClient client = new MysqlDbClient("server=.;database=MySqlDb;uid=user;pwd=password");
 
 类似的，可以创建访问Oracle，Sqlite或是其他数据库的客户端，只需要找到对应的`DbProviderFactory`实例即可。
 
@@ -178,15 +178,15 @@
 
 `Mappers`类中已经定义了部分简单类型的Mapper实现，以便实现便捷的查询。
 
-	// 使用已定义好的简单Mapper
-	IList<string> productNames = Db.Northwind.List(
+    // 使用已定义好的简单Mapper
+    IList<string> productNames = Db.Northwind.List(
         Mappers.String(), "SELECT ProductName FROM Products");
 
-	IList<int> productIds = Db.Northwind.List(
+    IList<int> productIds = Db.Northwind.List(
         Mappers.Int32(), "SELECT ProductID FROM Products");
-	
-	// 使用实现IConvertible的类型创建Mapper
-	IList<DateTime> orderDates = Db.Northwind.List(
+    
+    // 使用实现IConvertible的类型创建Mapper
+    IList<DateTime> orderDates = Db.Northwind.List(
         Mappers.Convertible<DateTime>(), "SELECT OrderDate FROM Orders");
 
 ### 使用事务
@@ -270,3 +270,48 @@
 为了避免同`ObjectiveExtension`中的方法歧义，这套扩展方法均在方法名称前增加了“Ix”前缀。
 
 通常在一个地方并不混用两套扩展。Dynamic扩展会更泛用一些，但在一些特定的场景下，使用Indexing扩展也是个好主意。还有，这套扩展方法速度会更快一些。
+
+
+## AnsiString
+
+类似 Dapper，我们使用相同的思路处理 AnsiString 的问题。有关问题可参考 [这里](https://lowleveldesign.org/2013/05/16/be-careful-with-varchars-in-dapper/)。
+
+为了传递 AnsiString，我们有下面的几种方法：
+
+    var db = Db.Northwind;
+    var sql = "SELECT @value";
+
+    // 直接传递 DbParameter 实例。
+    var param = db.CreateParameter();
+    param.ParameterName = "value";
+    param.Value = "non-unicode string";
+    param.DbType = DbType.AnsiString;
+    param.Size = 50;
+    db.Execute(sql, param);
+
+    // 也可以利用 DbClientParamEx 类中对应 CreateParameter() 扩展方法快速创建 DbParameter。
+    param = db.CreateParameter("value", DbType.AnsiString, "non-unicode string");
+    db.Execute(sql, param);
+
+    // 使用 DbString 类（没错，长得和 Dapper 一样）。
+    db.Execute(sql, new { value = new DbString { Value = "non-unicode string", IsAnsi = true } });
+    db.IxExecute("SELECT @0", new DbString { Value = "non-unicode string", IsAnsi = true });
+
+    // 利用 DbClientParamEx 类中 AnsiString() 扩展方法快速创建 DbString。
+    db.Execute(sql, new { value = "non-unicode string".AnsiString() });
+
+显然，AnsiString() 扩展方法是使用起来最简单便捷的。
+
+
+## 异步方法
+
+.net4.6版的所有数据库操作API均有对应的异步版本，它们具有与非异步版本相同的参数表，方法末尾增加“Async”，并返回`Task`或`Task<T>`，可以在 async/await 上下文中使用：
+    
+    string productName = await (string)Db.Northwind.ScalarAsync(
+        "SELECT ProductName FROM Products WHERE ProductID=115");
+
+    // Indexing 扩展方法
+    IList<Product> products = await Db.Northwind.IxListAsync<Product>(
+        "SELECT * FROM Products WHERE ProductID IN (@0, @1)", 15, 16);
+
+> 注意，由于还没有找到适当的方式，目前 DataTableAsync 和 DataSetAsync 方法实际上不是异步执行的。
