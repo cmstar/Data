@@ -118,7 +118,11 @@ namespace cmstar.Data
                 throw new InvalidOperationException("The length must be specified if the string is fixed-length.");
 
             var param = client.CreateParameter();
-            param.Value = dbString.Value;
+
+            // 小心 null，需要转为 DBNull，否则值为 CLR null 的参数会被忽略。
+            param.Value = (object)dbString.Value ?? DBNull.Value;
+
+            // AnsiString / IsFixedLength 总共4种情况。
             param.DbType = dbString.IsFixedLength
                 ? (dbString.IsAnsi ? DbType.AnsiStringFixedLength : DbType.StringFixedLength)
                 : (dbString.IsAnsi ? DbType.AnsiString : DbType.String);
@@ -146,13 +150,26 @@ namespace cmstar.Data
                 throw new NotSupportedException($"The type {type} can not be converted to DbType.");
 
             var p = client.CreateParameter();
-            p.DbType = dbType;
-            p.Value = value;
 
-            var stringValue = value as string;
-            if (stringValue != null && stringValue.Length <= DbString.DefaultLength)
+            if (value == null)
             {
-                p.Size = DbString.DefaultLength;
+                // 小心 null，需要转为 DBNull，否则值为 CLR null 的参数会被忽略。
+                p.Value = DBNull.Value;
+
+                // 对于 null 且类型是字符串的情况，总是给定 AnsiString。
+                // 因为 String 可以兼容 AnsiString，反向却不一定。
+                p.DbType = dbType == DbType.String ? DbType.AnsiString : dbType;
+            }
+            else
+            {
+                p.DbType = dbType;
+                p.Value = value;
+
+                var stringValue = value as string;
+                if (stringValue != null && stringValue.Length <= DbString.DefaultLength)
+                {
+                    p.Size = DbString.DefaultLength;
+                }
             }
 
             return p;
