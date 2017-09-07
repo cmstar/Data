@@ -59,14 +59,6 @@ namespace cmstar.Data
         }
 
         /// <summary>
-        /// 开启一个事务。
-        /// </summary>
-        public void Begin()
-        {
-            ValidateStatus();
-        }
-
-        /// <summary>
         /// 提交事务。
         /// </summary>
         public void Commit()

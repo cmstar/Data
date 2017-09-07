@@ -113,14 +113,6 @@ namespace cmstar.Data
             Dispose(true);
         }
 
-        void ITransactionKeeper.Begin()
-        {
-            if (!LocalConnectionInitialized())
-                return;
-
-            ValidateStatus();
-        }
-
         /// <summary>
         /// 提交事务。
         /// </summary>

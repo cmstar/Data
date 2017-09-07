@@ -8,11 +8,6 @@ namespace cmstar.Data
     public interface ITransactionKeeper : IDisposable, IDbClient
     {
         /// <summary>
-        /// 开启一个事务。
-        /// </summary>
-        void Begin();
-
-        /// <summary>
         /// 提交事务。
         /// </summary>
         void Commit();
