@@ -7,7 +7,7 @@ namespace cmstar.Data
     /// <summary>
     /// 使用MSDTC进行的分布式事务控制。
     /// </summary>
-    public class TransactionScopeTransactionKeeper : AbstractDbClient, ITransactionKeeper
+    public sealed class TransactionScopeTransactionKeeper : AbstractDbClient, ITransactionKeeper
     {
         private readonly TransactionScope _tran;
         private bool _transactionCompleted;

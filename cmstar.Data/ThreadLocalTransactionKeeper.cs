@@ -19,7 +19,7 @@ namespace cmstar.Data
     /// 事务将被回滚。
     /// 注意，所有语句都将在事务内运行，包括查询。
     /// </remarks>
-    public class ThreadLocalTransactionKeeper : AbstractDbClient, ITransactionKeeper
+    public sealed class ThreadLocalTransactionKeeper : AbstractDbClient, ITransactionKeeper
     {
         private const string CallContextName = "CORE_DATA_TRANSACTION_THREADLOCAL";
         private static readonly object SyncBlock = new object();
