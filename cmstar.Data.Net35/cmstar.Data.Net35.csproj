@@ -148,6 +148,7 @@
     <Compile Include="..\cmstar.Data\TransactionScopeTransactionKeeper.cs">
       <Link>TransactionScopeTransactionKeeper.cs</Link>
     </Compile>
+    <Compile Include="NetFuture\Lazy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
