@@ -421,8 +421,8 @@ namespace cmstar.Data
 
         /// <summary>
         /// 打开指定的数据库连接。
-        /// 此方法在各<see cref="IDbClient"/>方法中的命令执行前被调用，重写此方法以控制其行为。
-        /// 这是一个异步操作。
+        /// 在异步API中，此方法于<see cref="CreateConnection"/>之后、<see cref="CreateCommand"/>之前被调用。
+        /// 如果连接本身是打开的（<see cref="DbConnection.State"/>为<see cref="ConnectionState.Open"/>），则什么也不做。
         /// </summary>
         /// <param name="connection">数据库连接。</param>
         protected virtual async Task OpenConnectionAsync(DbConnection connection)

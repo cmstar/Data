@@ -445,6 +445,7 @@ namespace cmstar.Data
         /// <summary>
         /// 创建数据库连接的实例。
         /// 在各<see cref="IDbClient"/>方法中使用此方法获取连接的实例。
+        /// 此方法在<see cref="OpenConnection"/>之前被调用。 
         /// 重写此方法以控制连接创建的行为。
         /// </summary>
         /// <returns>数据库连接的实例。</returns>
@@ -462,6 +463,7 @@ namespace cmstar.Data
         /// <summary>
         /// 从指定的数据库连接上创建<see cref="DbCommand"/>对象。
         /// 在各<see cref="IDbClient"/>方法中使用此方法获取<see cref="DbCommand"/>对象。
+        /// 此方法在<see cref="OpenConnection"/>之后被调用。 
         /// </summary>
         /// <param name="commandText">执行的脚本。</param>
         /// <param name="connection">数据库连接。</param>
@@ -492,7 +494,9 @@ namespace cmstar.Data
 
         /// <summary>
         /// 打开指定的数据库连接。
-        /// 此方法在各<see cref="IDbClient"/>方法中的命令执行前被调用，重写此方法以控制其行为。
+        /// 在非异步API中，此方法于<see cref="CreateConnection"/>之后、<see cref="CreateCommand"/>之前被调用。
+        /// 如果连接本身是打开的（<see cref="DbConnection.State"/>为<see cref="ConnectionState.Open"/>），则什么也不做。
+        /// 重写此方法以控制其行为。
         /// </summary>
         /// <param name="connection">数据库连接。</param>
         protected virtual void OpenConnection(DbConnection connection)
@@ -503,7 +507,8 @@ namespace cmstar.Data
 
         /// <summary>
         /// 关闭指定的数据库连接。
-        /// 此方法在各<see cref="IDbClient"/>方法中的命令执行后被调用，重写此方法以控制其行为。
+        /// 此方法在各<see cref="IDbClient"/>方法中的命令执行后被调用。
+        /// 重写此方法以控制其行为。
         /// </summary>
         /// <param name="connection">数据库连接。</param>
         protected virtual void CloseConnection(DbConnection connection)
@@ -518,6 +523,7 @@ namespace cmstar.Data
             OpenConnection(connection);
             return connection;
         }
+
         private IEnumerable<IDataRecord> YieldRows(DbConnection connection, DbDataReader reader)
         {
             try
