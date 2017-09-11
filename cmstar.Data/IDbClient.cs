@@ -6,7 +6,7 @@ using System.Data.Common;
 namespace cmstar.Data
 {
     /// <summary>
-    /// ¶¨ÒåÊý¾Ý¿â·ÃÎÊ¿Í»§¶Ë¡£
+    /// å®šä¹‰æ•°æ®åº“è®¿é—®å®¢æˆ·ç«¯ã€?
     /// </summary>
 #if NET35
     public interface IDbClient
@@ -15,185 +15,185 @@ namespace cmstar.Data
 #endif
     {
         /// <summary>
-        /// »ñÈ¡µ±Ç°ÊµÀýËùÊ¹ÓÃµÄÊý¾Ý¿âÁ¬½Ó×Ö·û´®¡£
+        /// èŽ·å–å½“å‰å®žä¾‹æ‰€ä½¿ç”¨çš„æ•°æ®åº“è¿žæŽ¥å­—ç¬¦ä¸²ã€?
         /// </summary>
         string ConnectionString { get; }
 
         /// <summary>
-        /// »ñÈ¡²éÑ¯µÄµÚÒ»ÐÐµÚÒ»ÁÐµÄÖµ¡£
+        /// èŽ·å–æŸ¥è¯¢çš„ç¬¬ä¸€è¡Œç¬¬ä¸€åˆ—çš„å€¼ã€?
         /// </summary>
-        /// <param name="sql">²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <returns>²éÑ¯½á¹ûµÄµÚÒ»ÐÐµÚÒ»ÁÐµÄÖµ¡£Èô²éÑ¯½á¹ûÐÐÊýÎª0£¬·µ»Ø<c>null</c>¡£</returns>
-        /// <exception cref="ArgumentNullException">µ±<paramref name="sql"/>Îª<c>null</c>¡£</exception>
-        /// <exception cref="ArgumentException">µ±<paramref name="sql"/>³¤¶ÈÎª0¡£</exception>
+        /// <param name="sql">æŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <returns>æŸ¥è¯¢ç»“æžœçš„ç¬¬ä¸€è¡Œç¬¬ä¸€åˆ—çš„å€¼ã€‚è‹¥æŸ¥è¯¢ç»“æžœè¡Œæ•°ä¸?ï¼Œè¿”å›?c>null</c>ã€?/returns>
+        /// <exception cref="ArgumentNullException">å½?paramref name="sql"/>ä¸?c>null</c>ã€?/exception>
+        /// <exception cref="ArgumentException">å½?paramref name="sql"/>é•¿åº¦ä¸?ã€?/exception>
         object Scalar(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// Ö´ÐÐ·Ç²éÑ¯SQLÓï¾ä£¬²¢·µ»ØËùÓ°ÏìµÄÐÐÊý¡£
+        /// æ‰§è¡ŒéžæŸ¥è¯¢SQLè¯­å¥ï¼Œå¹¶è¿”å›žæ‰€å½±å“çš„è¡Œæ•°ã€?
         /// </summary>
-        /// <param name="sql">·Ç²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <returns>SQLËùÓ°ÏìµÄÐÐÊý¡£</returns>
-        /// <exception cref="ArgumentNullException">µ±<paramref name="sql"/>Îª<c>null</c>¡£</exception>
-        /// <exception cref="ArgumentException">µ±<paramref name="sql"/>³¤¶ÈÎª0¡£</exception>
+        /// <param name="sql">éžæŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <returns>SQLæ‰€å½±å“çš„è¡Œæ•°ã€?/returns>
+        /// <exception cref="ArgumentNullException">å½?paramref name="sql"/>ä¸?c>null</c>ã€?/exception>
+        /// <exception cref="ArgumentException">å½?paramref name="sql"/>é•¿åº¦ä¸?ã€?/exception>
         int Execute(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// Ö´ÐÐ·Ç²éÑ¯SQLÓï¾ä£¬²¢¶ÏÑÔËùÓ°ÏìµÄÐÐÊý¡£ÈôÓ°ÏìµÄº¯Êý²»ÕýÈ·£¬Å×³öÒì³£¡£
+        /// æ‰§è¡ŒéžæŸ¥è¯¢SQLè¯­å¥ï¼Œå¹¶æ–­è¨€æ‰€å½±å“çš„è¡Œæ•°ã€‚è‹¥å½±å“çš„å‡½æ•°ä¸æ­£ç¡®ï¼ŒæŠ›å‡ºå¼‚å¸¸ã€?
         /// </summary>
-        /// <param name="expectedSize">±»¶ÏÑÔµÄÓ°ÏìÐÐÊý¡£</param>
-        /// <param name="sql">·Ç²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <exception cref="IncorrectResultSizeException">µ±Ó°ÏìµÄÐÐÊý²»ÕýÈ·¡£</exception>
+        /// <param name="expectedSize">è¢«æ–­è¨€çš„å½±å“è¡Œæ•°ã€?/param>
+        /// <param name="sql">éžæŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <exception cref="IncorrectResultSizeException">å½“å½±å“çš„è¡Œæ•°ä¸æ­£ç¡®ã€?/exception>
         void SizedExecute(int expectedSize,
             string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// ·µ»Ø²éÑ¯Óï¾ä¶ÔÓ¦²éÑ¯½á¹ûµÄ<see cref="System.Data.DataTable"/>¡£
+        /// è¿”å›žæŸ¥è¯¢è¯­å¥å¯¹åº”æŸ¥è¯¢ç»“æžœçš?see cref="System.Data.DataTable"/>ã€?
         /// </summary>
-        /// <param name="sql">²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <returns>±íÊ¾²éÑ¯½á¹ûµÄ<see cref="System.Data.DataTable"/>¡£</returns>
-        /// <exception cref="ArgumentNullException">µ±<paramref name="sql"/>Îª<c>null</c>¡£</exception>
-        /// <exception cref="ArgumentException">µ±<paramref name="sql"/>³¤¶ÈÎª0¡£</exception>
+        /// <param name="sql">æŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <returns>è¡¨ç¤ºæŸ¥è¯¢ç»“æžœçš?see cref="System.Data.DataTable"/>ã€?/returns>
+        /// <exception cref="ArgumentNullException">å½?paramref name="sql"/>ä¸?c>null</c>ã€?/exception>
+        /// <exception cref="ArgumentException">å½?paramref name="sql"/>é•¿åº¦ä¸?ã€?/exception>
         DataTable DataTable(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// ·µ»Ø²éÑ¯Óï¾ä¶ÔÓ¦²éÑ¯½á¹ûµÄ<see cref="System.Data.DataSet"/>¡£
+        /// è¿”å›žæŸ¥è¯¢è¯­å¥å¯¹åº”æŸ¥è¯¢ç»“æžœçš?see cref="System.Data.DataSet"/>ã€?
         /// </summary>
-        /// <param name="sql">²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <returns>±íÊ¾²éÑ¯½á¹ûµÄ<see cref="System.Data.DataSet"/>¡£</returns>
-        /// <exception cref="ArgumentNullException">µ±<paramref name="sql"/>Îª<c>null</c>¡£</exception>
-        /// <exception cref="ArgumentException">µ±<paramref name="sql"/>³¤¶ÈÎª0¡£</exception>
+        /// <param name="sql">æŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <returns>è¡¨ç¤ºæŸ¥è¯¢ç»“æžœçš?see cref="System.Data.DataSet"/>ã€?/returns>
+        /// <exception cref="ArgumentNullException">å½?paramref name="sql"/>ä¸?c>null</c>ã€?/exception>
+        /// <exception cref="ArgumentException">å½?paramref name="sql"/>é•¿åº¦ä¸?ã€?/exception>
         DataSet DataSet(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// ÅÐ¶Ï¸ø¶¨µÄ²éÑ¯µÄ½á¹ûÊÇ·ñÖÁÉÙ°üº¬1ÐÐ¡£
+        /// åˆ¤æ–­ç»™å®šçš„æŸ¥è¯¢çš„ç»“æžœæ˜¯å¦è‡³å°‘åŒ…å«1è¡Œã€?
         /// </summary>
-        /// <param name="sql">²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <returns>Èô²éÑ¯½á¹ûÖÁÉÙ°üº¬1ÐÐ£¬·µ»Ø<c>true</c>£»·ñÔò·µ»Ø<c>false</c>¡£</returns>
-        /// <exception cref="ArgumentNullException">µ±<paramref name="sql"/>Îª<c>null</c>¡£</exception>
-        /// <exception cref="ArgumentException">µ±<paramref name="sql"/>³¤¶ÈÎª0¡£</exception>
+        /// <param name="sql">æŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <returns>è‹¥æŸ¥è¯¢ç»“æžœè‡³å°‘åŒ…å?è¡Œï¼Œè¿”å›ž<c>true</c>ï¼›å¦åˆ™è¿”å›?c>false</c>ã€?/returns>
+        /// <exception cref="ArgumentNullException">å½?paramref name="sql"/>ä¸?c>null</c>ã€?/exception>
+        /// <exception cref="ArgumentException">å½?paramref name="sql"/>é•¿åº¦ä¸?ã€?/exception>
         bool Exists(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// »ñÈ¡²éÑ¯½á¹ûµÄµÚÒ»ÐÐ¼ÇÂ¼¡£
-        /// Èô²éÑ¯ÃüÖÐµÄÐÐÊýÎª0£¬·µ»Ønull¡£
+        /// èŽ·å–æŸ¥è¯¢ç»“æžœçš„ç¬¬ä¸€è¡Œè®°å½•ã€?
+        /// è‹¥æŸ¥è¯¢å‘½ä¸­çš„è¡Œæ•°ä¸?ï¼Œè¿”å›žnullã€?
         /// </summary>
-        /// <param name="sql">²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <returns><see cref="IDataRecord"/>µÄÊµÏÖ£¬°üº¬²éÑ¯µÄµÚÒ»ÐÐ¼ÇÂ¼¡£</returns>
-        /// <exception cref="ArgumentNullException">µ±<paramref name="sql"/>Îª<c>null</c>¡£</exception>
-        /// <exception cref="ArgumentException">µ±<paramref name="sql"/>³¤¶ÈÎª0¡£</exception>
+        /// <param name="sql">æŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <returns><see cref="IDataRecord"/>çš„å®žçŽ°ï¼ŒåŒ…å«æŸ¥è¯¢çš„ç¬¬ä¸€è¡Œè®°å½•ã€?/returns>
+        /// <exception cref="ArgumentNullException">å½?paramref name="sql"/>ä¸?c>null</c>ã€?/exception>
+        /// <exception cref="ArgumentException">å½?paramref name="sql"/>é•¿åº¦ä¸?ã€?/exception>
         /// <remarks>
-        /// Çø±ðÓÚ<see cref="DbCommand.ExecuteReader()"/>µÄÓÃ·¨£¬´Ë·½·¨Ö´ÐÐÍê±Ïºó½«²¢²»±£³ÖÊý¾Ý¿âÁ¬½Ó£¬
-        /// Ò²²»ÐèÒªµ÷ÓÃ<see cref="IDisposable.Dispose"/>¡£
+        /// åŒºåˆ«äº?see cref="DbCommand.ExecuteReader()"/>çš„ç”¨æ³•ï¼Œæ­¤æ–¹æ³•æ‰§è¡Œå®Œæ¯•åŽå°†å¹¶ä¸ä¿æŒæ•°æ®åº“è¿žæŽ¥ï¼?
+        /// ä¹Ÿä¸éœ€è¦è°ƒç”?see cref="IDisposable.Dispose"/>ã€?
         /// </remarks>
         IDataRecord GetRow(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// »ñÈ¡²éÑ¯½á¹ûµÄµÚÒ»ÐÐ¼ÇÂ¼£¬ÒÔÊý×éÐÎÊ½·µ»Ø¼ÇÂ¼ÄÚ¸÷ÁÐµÄÖµ¡£
-        /// Êý×éÔªËØË³ÐòÓëÁÐË³ÐòÒ»ÖÂ¡£Èô²éÑ¯ÃüÖÐµÄÐÐÊýÎª0£¬·µ»Ønull¡£
+        /// èŽ·å–æŸ¥è¯¢ç»“æžœçš„ç¬¬ä¸€è¡Œè®°å½•ï¼Œä»¥æ•°ç»„å½¢å¼è¿”å›žè®°å½•å†…å„åˆ—çš„å€¼ã€?
+        /// æ•°ç»„å…ƒç´ é¡ºåºä¸Žåˆ—é¡ºåºä¸€è‡´ã€‚è‹¥æŸ¥è¯¢å‘½ä¸­çš„è¡Œæ•°ä¸º0ï¼Œè¿”å›žnullã€?
         /// </summary>
-        /// <param name="sql">²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <returns>°üº¬ÁË¸÷ÁÐµÄÖµµÄÊý×é¡£</returns>
-        /// <exception cref="ArgumentNullException">µ±<paramref name="sql"/>Îª<c>null</c>¡£</exception>
-        /// <exception cref="ArgumentException">µ±<paramref name="sql"/>³¤¶ÈÎª0¡£</exception>
+        /// <param name="sql">æŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <returns>åŒ…å«äº†å„åˆ—çš„å€¼çš„æ•°ç»„ã€?/returns>
+        /// <exception cref="ArgumentNullException">å½?paramref name="sql"/>ä¸?c>null</c>ã€?/exception>
+        /// <exception cref="ArgumentException">å½?paramref name="sql"/>é•¿åº¦ä¸?ã€?/exception>
         object[] ItemArray(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// Ê¹ÓÃ<see cref="IMapper{T}"/>²éÑ¯Ö¸¶¨¶ÔÏó¡£
-        /// ÈôÂú×ãÌõ¼þµÄ¼ÇÂ¼²»´æÔÚ£¬·µ»ØÄ¿±êÀàÐÍµÄÄ¬ÈÏÖµ£¨¶ÔÓÚÒýÓÃÀàÐÍÎª<c>null</c>£©¡£
+        /// ä½¿ç”¨<see cref="IMapper{T}"/>æŸ¥è¯¢æŒ‡å®šå¯¹è±¡ã€?
+        /// è‹¥æ»¡è¶³æ¡ä»¶çš„è®°å½•ä¸å­˜åœ¨ï¼Œè¿”å›žç›®æ ‡ç±»åž‹çš„é»˜è®¤å€¼ï¼ˆå¯¹äºŽå¼•ç”¨ç±»åž‹ä¸?c>null</c>ï¼‰ã€?
         /// </summary>
-        /// <typeparam name="T">²éÑ¯µÄÄ¿±êÀàÐÍ¡£</typeparam>
-        /// <param name="sql">²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <param name="mapper"><see cref="IMapper{T}"/>µÄÊµÀý¡£</param>
-        /// <returns>Ä¿±êÀàÐÍµÄÊµÀý¡£</returns>
+        /// <typeparam name="T">æŸ¥è¯¢çš„ç›®æ ‡ç±»åž‹ã€?/typeparam>
+        /// <param name="sql">æŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <param name="mapper"><see cref="IMapper{T}"/>çš„å®žä¾‹ã€?/param>
+        /// <returns>ç›®æ ‡ç±»åž‹çš„å®žä¾‹ã€?/returns>
         T Get<T>(IMapper<T> mapper, string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// Ê¹ÓÃ<see cref="IMapper{T}"/>²éÑ¯Ö¸¶¨¶ÔÏó¡£
-        /// SQLÃüÖÐµÄ¼ÇÂ¼±ØÐëÎª1ÐÐ£¬·ñÔòÅ×³öÒì³£¡£
+        /// ä½¿ç”¨<see cref="IMapper{T}"/>æŸ¥è¯¢æŒ‡å®šå¯¹è±¡ã€?
+        /// SQLå‘½ä¸­çš„è®°å½•å¿…é¡»ä¸º1è¡Œï¼Œå¦åˆ™æŠ›å‡ºå¼‚å¸¸ã€?
         /// </summary>
-        /// <typeparam name="T">²éÑ¯µÄÄ¿±êÀàÐÍ¡£</typeparam>
-        /// <param name="mapper"><see cref="IMapper{T}"/>µÄÊµÀý¡£</param>
-        /// <param name="sql">²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <returns>Ä¿±êÀàÐÍµÄÊµÀý¡£</returns>
-        /// <exception cref="IncorrectResultSizeException">µ±SQLÃüÖÐµÄ¼ÇÂ¼ÐÐÊý²»Îª 1¡£</exception>
+        /// <typeparam name="T">æŸ¥è¯¢çš„ç›®æ ‡ç±»åž‹ã€?/typeparam>
+        /// <param name="mapper"><see cref="IMapper{T}"/>çš„å®žä¾‹ã€?/param>
+        /// <param name="sql">æŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <returns>ç›®æ ‡ç±»åž‹çš„å®žä¾‹ã€?/returns>
+        /// <exception cref="IncorrectResultSizeException">å½“SQLå‘½ä¸­çš„è®°å½•è¡Œæ•°ä¸ä¸?1ã€?/exception>
         T ForceGet<T>(IMapper<T> mapper,
             string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// Ê¹ÓÃ<see cref="IMapper{T}"/>²éÑ¯Ö¸¶¨¶ÔÏóµÄ¼¯ºÏ¡£
+        /// ä½¿ç”¨<see cref="IMapper{T}"/>æŸ¥è¯¢æŒ‡å®šå¯¹è±¡çš„é›†åˆã€?
         /// </summary>
-        /// <typeparam name="T">²éÑ¯µÄÄ¿±êÀàÐÍ¡£</typeparam>
-        /// <param name="mapper"><see cref="IMapper{T}"/>µÄÊµÀý¡£</param>
-        /// <param name="sql">²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <returns>Ä¿±êÀàÐÍµÄÊµÀýµÄ¼¯ºÏ¡£Èô²éÑ¯ÃüÖÐµÄÐÐÊýÎª0£¬·µ»Ø¿Õ¼¯ºÏ¡£</returns>
+        /// <typeparam name="T">æŸ¥è¯¢çš„ç›®æ ‡ç±»åž‹ã€?/typeparam>
+        /// <param name="mapper"><see cref="IMapper{T}"/>çš„å®žä¾‹ã€?/param>
+        /// <param name="sql">æŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <returns>ç›®æ ‡ç±»åž‹çš„å®žä¾‹çš„é›†åˆã€‚è‹¥æŸ¥è¯¢å‘½ä¸­çš„è¡Œæ•°ä¸º0ï¼Œè¿”å›žç©ºé›†åˆã€?/returns>
         IList<T> List<T>(IMapper<T> mapper,
             string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// »ñÈ¡²éÑ¯½á¹ûµÃÐÐÐòÁÐ¡£
+        /// èŽ·å–æŸ¥è¯¢ç»“æžœå¾—è¡Œåºåˆ—ã€?
         /// </summary>
-        /// <param name="sql">²éÑ¯SQL¡£</param>
-        /// <param name="parameters">²ÎÊýÐòÁÐ¡£¿ÕÐòÁÐ»ònull±íÊ¾Ã»ÓÐ²ÎÊý¡£</param>
-        /// <param name="commandType">ÃüÁîµÄÀàÐÍ¡£</param>
-        /// <param name="Timeout">ÃüÁîµÄ³¬Ê±Ê±¼ä£¬µ¥Î»ºÁÃë¡£0Îª²»Ö¸¶¨¡£</param>
-        /// <returns>²éÑ¯½á¹ûµÃÐÐÐòÁÐ¡£</returns>
+        /// <param name="sql">æŸ¥è¯¢SQLã€?/param>
+        /// <param name="parameters">å‚æ•°åºåˆ—ã€‚ç©ºåºåˆ—æˆ–nullè¡¨ç¤ºæ²¡æœ‰å‚æ•°ã€?/param>
+        /// <param name="commandType">å‘½ä»¤çš„ç±»åž‹ã€?/param>
+        /// <param name="timeout">å‘½ä»¤çš„è¶…æ—¶æ—¶é—´ï¼Œå•ä½æ¯«ç§’ã€?ä¸ºä¸æŒ‡å®šã€?/param>
+        /// <returns>æŸ¥è¯¢ç»“æžœå¾—è¡Œåºåˆ—ã€?/returns>
         IEnumerable<IDataRecord> Rows(string sql, IEnumerable<DbParameter> parameters = null,
-            CommandType commandType = CommandType.Text, int Timeout = 0);
+            CommandType commandType = CommandType.Text, int timeout = 0);
 
         /// <summary>
-        /// ´´½¨ÊÂÎñÈÝÆ÷¡£
+        /// åˆ›å»ºäº‹åŠ¡å®¹å™¨ã€?
         /// </summary>
-        /// <returns><see cref="ITransactionKeeper"/>¡£</returns>
+        /// <returns><see cref="ITransactionKeeper"/>ã€?/returns>
         ITransactionKeeper CreateTransaction();
 
         /// <summary>
-        /// ´´½¨Ò»¸öÐÂµÄSQL²ÎÊýÊµÀý¡£
+        /// åˆ›å»ºä¸€ä¸ªæ–°çš„SQLå‚æ•°å®žä¾‹ã€?
         /// </summary>
-        /// <returns><see cref="DbParameter"/>µÄÊµÀý¡£</returns>
+        /// <returns><see cref="DbParameter"/>çš„å®žä¾‹ã€?/returns>
         DbParameter CreateParameter();
     }
 }
