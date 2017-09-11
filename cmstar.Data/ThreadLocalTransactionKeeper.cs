@@ -2,17 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Runtime.Remoting.Messaging;
-using System.Threading;
 
 namespace cmstar.Data
 {
     /// <summary>
-    /// 与线程绑定有关的<see cref="ITransactionKeeper"/>的实现。
-    /// 控制一个线程中获取到的实例总是同一个，使事务嵌套的情况下，内层申明的事务实际上跑在外层的实例作用域中。
-    /// 嵌套事务绑定在当前的代码执行路径（CallContext）上，若将同一实例传递到在多个不同执行路径的线程内，每个
-    /// 线程中调用<see cref="OpenTransaction"/>方法，都将开启一个独立的新事务。
-    /// 类型的实例成员并不是线程安全的。 
+    /// 提供单个线程使用的<see cref="ITransactionKeeper"/>的实现。
+    /// 允许对一个实例调用<see cref="CreateTransaction"/>方法再次创建事务，事务具有递归层级计数，
+    /// 具有递归层级的事务不实际执行提交或回滚，当递归层级为0时才会执行。
+    /// 类型的实例成员并不是线程安全的，不要通过多线程并发访问。 
     /// </summary>
     /// <remarks>
     /// 若<see cref="IDisposable.Dispose"/>在<see cref="ITransactionKeeper.Commit"/>之前被调用，
@@ -21,60 +18,35 @@ namespace cmstar.Data
     /// </remarks>
     public sealed class ThreadLocalTransactionKeeper : AbstractDbClient, ITransactionKeeper
     {
-        private const string CallContextName = "CORE_DATA_TRANSACTION_THREADLOCAL";
-        private static readonly object SyncBlock = new object();
+        // 当前事务所使用的数据库连接。
+        // 使用延迟加载，在第一次执行数据库操作时创建。
+        private DbConnection _connection;
+
+        // 当前事务的 DbTransaction 实例。
+        // 使用延迟加载，在第一次执行数据库操作时创建。
+        private DbTransaction _transaction;
+
+        // 当前事务是否已经完结，若完结则不允许再执行数据库操作。
+        // 初始值 false，事务提交或回滚后为 true。
+        private bool _transactionCompleted;
+
+        // Dispose 方法是否已经执行过，Dispose 后的对象不在允许其他操作，否则抛出 ObjectDisposedException。 
+        private bool _disposed;
+
+        // 事务的嵌套层级。
+        // ITransactionKeeper 接口继承了 IDbClient，所以具有 CreateTrasaction 方法。
+        // 刚创建的事务潜逃层级为0，事务内再次创建事务时+1，并返回（复用）当前实例。
+        private int _embeddedLevel;
 
         /// <summary>
-        /// 获取绑定到当前线程的<see cref="ThreadLocalTransactionKeeper"/>实例。
+        /// 创建<see cref="ThreadLocalTransactionKeeper"/>的新实例。
         /// </summary>
         /// <param name="dbProviderFactory"><see cref="DbProviderFactory"/>实例。</param>
         /// <param name="connectionString">初始化数据库连接的连接字符串。</param>
         /// <param name="commandTimeout">
         /// 指定事务内的命令的默认执行超时时间，当方法没有单独制定超时时，套用此超时值。
         /// </param>
-        /// <returns><see cref="ThreadLocalTransactionKeeper"/>实例。</returns>
-        public static ThreadLocalTransactionKeeper OpenTransaction(
-            DbProviderFactory dbProviderFactory, string connectionString, int commandTimeout)
-        {
-            ThreadLocalTransactionKeeper keeper;
-
-            // 为了支持事务嵌套（一个事务上再开一个事务），在同一个线程中每次访问 OpenTransaction 都应该获得
-            // 同一个事务实例，并记录嵌套级别；Commit 方法仅当嵌套级别为0时才真正提交。
-            // 这个事务实例一般是绑定在当前执行线程上的，但在调用异步（async）代码后，线程可能切换，为了支持
-            // 异步调用下的正常访问，这里通过 CallContext.LogicalGetData/LogicalSetData 设置与找回事务实例。
-
-            lock (SyncBlock)
-            {
-                keeper = (ThreadLocalTransactionKeeper)CallContext.LogicalGetData(CallContextName);
-
-                // 同一个上下文（CallContext）的代码可能重复的开启关闭多次事务，每次提交或回滚后，再次开启新
-                // 事务时，应创建新的实例，避免拿到之前已经 Dispose 的实例。
-                // 虽然 Dispose 时会将 CallContext 里的引用清理掉，但每个方法的文档都说*可能会*抛出异常，为了
-                // 防止没有成功清理，这里也判断一下 _disposed 字段的值。
-                if (keeper == null || keeper._disposed)
-                {
-                    keeper = new ThreadLocalTransactionKeeper(dbProviderFactory, connectionString, commandTimeout);
-                    CallContext.LogicalSetData(CallContextName, keeper);
-                }
-                else
-                {
-                    // 增加事务嵌套层级计数。
-                    keeper._embeddedLevel++;
-                }
-            }
-
-            return keeper;
-        }
-
-        private readonly object _syncRoot = new object();
-
-        private DbTransaction _transaction;
-        private DbConnection _connection;
-        private bool _transactionCompleted;
-        private bool _disposed; // Dispose 方法是否已经执行过
-        private int _embeddedLevel; // 事务的嵌套层级，刚创建的事务值为0，事务内再创建则+1
-
-        private ThreadLocalTransactionKeeper(
+        public ThreadLocalTransactionKeeper(
             DbProviderFactory dbProviderFactory, string connectionString, int commandTimeout)
         {
             ArgAssert.NotNull(dbProviderFactory, nameof(dbProviderFactory));
@@ -88,7 +60,32 @@ namespace cmstar.Data
         /// <inheritdoc />
         ~ThreadLocalTransactionKeeper()
         {
-            Dispose(false);
+            if (_disposed || _connection == null)
+                return;
+
+            // 参考：
+            // https://msdn.microsoft.com/en-us/library/system.data.common.dbconnection.close.aspx
+            // -----
+            // Do not call Close or Dispose on a Connection, a DataReader, or any other managed object 
+            // in the Finalize method of your class. In a finalizer, you should only release unmanaged 
+            // resources that your class owns directly.
+            // -----
+            // Finalize 中不能调用 DbConnection.Close，否则会出现异常：
+            //     InvalidOperationException: Internal .Net Framework Data Provider error 1.
+            // 所以仅在从 Dispose 方法进入时关闭连接。但 DbConnection 自身的释放可能不会很及时，我们希望
+            // 用户没有正确调用 Dispose 的情况下，事务仍能够尽快被释放掉，所以这里调用 Rollback 处理。
+            try
+            {
+                // 对于未嵌套的事务执行回滚操作。
+                if (!_transactionCompleted)
+                {
+                    Rollback();
+                }
+            }
+            catch
+            {
+                // 忽略异常，否则在GC线程内抛出异常会导致整个程序崩溃。
+            }
         }
 
         /// <summary>
@@ -101,118 +98,68 @@ namespace cmstar.Data
         /// </summary>
         protected override DbProviderFactory Factory { get; }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        /// <filterpriority>2</filterpriority>
+        /// <inheritdoc cref="IDisposable.Dispose" />
         public void Dispose()
         {
-            if (_disposed)
+            if (_disposed || _connection == null)
                 return;
 
-            Dispose(true);
-        }
-
-        /// <summary>
-        /// 提交事务。
-        /// </summary>
-        public void Commit()
-        {
-            if (!LocalConnectionInitialized())
-                return;
-
-            ValidateStatus();
-
-            if (_embeddedLevel == 0)
-            {
-                LocalTransaction().Commit();
-                _transactionCompleted = true;
-            }
-        }
-
-        /// <summary>
-        /// 回滚事务。
-        /// </summary>
-        public void Rollback()
-        {
-            if (!LocalConnectionInitialized())
-                return;
-
-            ValidateStatus();
-
-            if (_embeddedLevel == 0)
-            {
-                LocalTransaction().Rollback();
-                _transactionCompleted = true;
-            }
-        }
-
-        private void ValidateStatus()
-        {
-            if (_connection.State == ConnectionState.Closed || _connection.State == ConnectionState.Broken)
-                throw new InvalidOperationException("The database connction was closed.");
-
-            if (_transactionCompleted)
-                throw new InvalidOperationException("The transaction was finished.");
-
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            //在嵌套事务申明中，并不真正处理嵌套的事务，仅递减嵌套级别
+            // 在嵌套事务申明中，并不真正处理嵌套的事务，仅递减嵌套级别。
             if (_embeddedLevel > 0)
             {
                 _embeddedLevel--;
                 return;
             }
 
-            //对于未嵌套的事务执行真实的资源释放操作
-            try
+            // 对于未嵌套的事务执行回滚操作。直接关闭连接，事务就被回滚了。
+            if (_connection.State == ConnectionState.Open)
             {
-                //若由Finalize方法调用，且此时刚好处于整个进程的结束期间，
-                //许多依赖资源可能已被回收，可导致无法显式地回滚事务
-                //故仅在显式释放资源时使用显式的事务回滚
-                if (disposing && !_transactionCompleted)
-                    Rollback();
-
-                //关闭数据库连接，若此时事务未完成，则会被数据库回滚
-                if (LocalConnectionInitialized())
-                    _connection.Dispose();
+                _connection.Close();
             }
-            finally
-            {
-                _disposed = true;
 
-                // 用完后，需要从 CallContext 里清理掉当前对象的引用，否则引用会被一直保持着。
-                CallContext.LogicalSetData(CallContextName, null);
+            // 显式释放资源时，阻止 GC 调用 Finalize 方法。
+            GC.SuppressFinalize(this);
 
-                //显式释放资源时，阻止GC调用Finalize方法
-                if (disposing)
-                    GC.SuppressFinalize(this);
-            }
+            _disposed = true;
+        }
+
+        /// <inheritdoc cref="ITransactionKeeper.Commit" />
+        public void Commit()
+        {
+            if (!CanCommitOrRollback)
+                return;
+
+            _transaction.Commit();
+            _transactionCompleted = true;
+        }
+
+        /// <inheritdoc cref="ITransactionKeeper.Rollback" />
+        public void Rollback()
+        {
+            if (!CanCommitOrRollback)
+                return;
+
+            _transaction.Rollback();
+            _transactionCompleted = true;
         }
 
         /// <inheritdoc cref="AbstractDbClient.CreateConnection" />
         protected override DbConnection CreateConnection()
         {
-            return LocalConnection();
-        }
+            CheckStatus();
 
-        /// <inheritdoc cref="AbstractDbClient.OpenConnection" />
-        protected override void OpenConnection(DbConnection connection)
-        {
-            lock (_syncRoot)
-            {
-                base.OpenConnection(connection);
-            }
+            // 整个事务使用同一个连接。
+            if (_connection != null)
+                return _connection;
+
+            _connection = base.CreateConnection();
+            return _connection;
         }
 
         /// <inheritdoc cref="AbstractDbClient.CloseConnection" />
         protected override void CloseConnection(DbConnection connection)
         {
-            //连接在Dispose时关闭，此处什么也不做
+            // 连接在 Dispose 时关闭，此处什么也不做。
         }
 
         /// <inheritdoc cref="AbstractDbClient.CreateCommand" />
@@ -222,44 +169,57 @@ namespace cmstar.Data
         {
             var cmd = base.CreateCommand(sql, connection, parameters, commandType, timeout);
 
-            //将DbCommand并入本地事务
-            cmd.Transaction = LocalTransaction();
+            // 延迟创建事务。
+            if (_transaction == null)
+            {
+                _transaction = _connection.BeginTransaction();
+            }
+
+            // 将创建出来的 DbCommand 加入当前的事务中。
+            cmd.Transaction = _transaction;
 
             return cmd;
         }
 
-        private DbConnection LocalConnection()
+        /// <inheritdoc  cref="AbstractDbClient.CreateTransaction" />
+        public override ITransactionKeeper CreateTransaction()
         {
-            if (_connection == null)
-            {
-                lock (_syncRoot)
-                {
-                    Thread.MemoryBarrier();
+            CheckStatus();
 
-                    if (_connection == null)
-                        _connection = base.CreateConnection();
-                }
-            }
-            return _connection;
+            // 在事务内再次创建事务时，复用当前实例，仅增加事务嵌套层级计数。
+            _embeddedLevel++;
+            return this;
         }
 
-        private DbTransaction LocalTransaction()
+        private void CheckStatus()
         {
-            if (_transaction == null)
-            {
-                lock (_syncRoot)
-                {
-                    Thread.MemoryBarrier();
-                    if (_transaction == null)
-                        _transaction = LocalConnection().BeginTransaction();
-                }
-            }
-            return _transaction;
+            if (_transactionCompleted)
+                throw new InvalidOperationException("The transaction was finished.");
+
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
         }
 
-        private bool LocalConnectionInitialized()
+        // 检查当前实例的状态，在状态无效时抛出异常。若当前事务能够被提交或回滚，返回 true。
+        private bool CanCommitOrRollback
         {
-            return _connection != null;
+            get
+            {
+                // 事务没有被创建出来则不需要提交或回滚。
+                if (_connection == null || _transaction == null)
+                    return false;
+
+                // 嵌套的事务中，实际的回滚与提交交给最外层处理，内层仅减少嵌套级别（由 Dispose 方法执行）。
+                if (_embeddedLevel != 0)
+                    return false;
+
+                var state = _connection.State;
+                if (state == ConnectionState.Closed || state == ConnectionState.Broken)
+                    throw new InvalidOperationException("The database connction was closed.");
+
+                CheckStatus();
+                return true;
+            }
         }
     }
 }

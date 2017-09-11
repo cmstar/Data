@@ -430,7 +430,7 @@ namespace cmstar.Data
         /// <returns><see cref="ITransactionKeeper"/>。</returns>
         public virtual ITransactionKeeper CreateTransaction()
         {
-            return ThreadLocalTransactionKeeper.OpenTransaction(Factory, ConnectionString, DefaultTimeout);
+            return new ThreadLocalTransactionKeeper(Factory, ConnectionString, DefaultTimeout);
         }
 
         /// <summary>
