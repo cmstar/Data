@@ -307,7 +307,7 @@
 
 .net4.6版的所有数据库操作API均有对应的异步版本，它们具有与非异步版本相同的参数表，方法末尾增加“Async”，并返回`Task`或`Task<T>`，可以在 async/await 上下文中使用：
     
-    string productName = await (string)Db.Northwind.ScalarAsync(
+    string productName = (string)await Db.Northwind.ScalarAsync(
         "SELECT ProductName FROM Products WHERE ProductID=115");
 
     // Indexing 扩展方法
