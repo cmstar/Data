@@ -193,7 +193,7 @@ namespace cmstar.Data
         /// <returns>目标类型的实例。</returns>
         public static T IxGet<T>(this IDbClient client, string sql, params object[] param)
         {
-            var identity = new CommandIdentity(client.ConnectionString, string.Empty, null, null, typeof(T));
+            var identity = new CommandIdentity(client.ConnectionString, sql, null, null, typeof(T));
             var cache = CommandCache.Get(identity);
             if (cache != null)
                 return IxGet(client, (IMapper<T>)cache.Mapper, sql, param);
@@ -219,7 +219,7 @@ namespace cmstar.Data
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
         public static T IxForceGet<T>(this IDbClient client, string sql, params object[] param)
         {
-            var identity = new CommandIdentity(client.ConnectionString, string.Empty, null, null, typeof(T));
+            var identity = new CommandIdentity(client.ConnectionString, sql, null, null, typeof(T));
             var cache = CommandCache.Get(identity);
             if (cache != null)
                 return IxForceGet(client, (IMapper<T>)cache.Mapper, sql, param);
@@ -298,7 +298,7 @@ namespace cmstar.Data
         /// <returns>目标类型的实例序列。</returns>
         public static IEnumerable<T> IxQuery<T>(this IDbClient client, string sql, params object[] param)
         {
-            var identity = new CommandIdentity(client.ConnectionString, string.Empty, null, null, typeof(T));
+            var identity = new CommandIdentity(client.ConnectionString, sql, null, null, typeof(T));
             var cache = CommandCache.Get(identity);
 
             var mapper = (IMapper<T>)cache?.Mapper;

@@ -189,7 +189,7 @@ namespace cmstar.Data
         /// <returns>目标类型的实例。</returns>
         public static async Task<T> IxGetAsync<T>(this IDbClient client, string sql, params object[] param)
         {
-            var identity = new CommandIdentity(client.ConnectionString, string.Empty, null, null, typeof(T));
+            var identity = new CommandIdentity(client.ConnectionString, sql, null, null, typeof(T));
             var cache = CommandCache.Get(identity);
             if (cache != null)
                 return await IxGetAsync(client, (IMapper<T>)cache.Mapper, sql, param);
@@ -216,7 +216,7 @@ namespace cmstar.Data
         /// <exception cref="IncorrectResultSizeException">当SQL命中的记录行数不为 1。</exception>
         public static async Task<T> IxForceGetAsync<T>(this IDbClient client, string sql, params object[] param)
         {
-            var identity = new CommandIdentity(client.ConnectionString, string.Empty, null, null, typeof(T));
+            var identity = new CommandIdentity(client.ConnectionString, sql, null, null, typeof(T));
             var cache = CommandCache.Get(identity);
             if (cache != null)
                 return await IxForceGetAsync(client, (IMapper<T>)cache.Mapper, sql, param);
@@ -292,7 +292,7 @@ namespace cmstar.Data
         /// <returns>目标类型的实例序列。</returns>
         public static async Task<IEnumerable<T>> IxQueryAsync<T>(this IDbClient client, string sql, params object[] param)
         {
-            var identity = new CommandIdentity(client.ConnectionString, string.Empty, null, null, typeof(T));
+            var identity = new CommandIdentity(client.ConnectionString, sql, null, null, typeof(T));
             var cache = CommandCache.Get(identity);
             var mapper = (IMapper<T>)cache?.Mapper;
 
