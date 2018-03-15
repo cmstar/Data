@@ -88,13 +88,13 @@ namespace cmstar.Data.Dynamic
                     // an error for un-nullable types
                     var msg = string.Format(
                         "Can not cast DBNull to member type {0} of member '{1}'.",
-                        setup.MemberType, setup.MemberName);
+                        setup.MemberUnderlyingType, setup.MemberName);
                     throw new InvalidCastException(msg);
                 }
 
                 try
                 {
-                    var memberType = setup.MemberType;
+                    var memberType = setup.MemberUnderlyingType;
                     var finalValue = value;
 
                     if (setup.IsEnum)
@@ -121,7 +121,7 @@ namespace cmstar.Data.Dynamic
                     var valueType = value.GetType();
                     var msg = string.Format(
                         "Can not cast the source data type {0} to member type {1} of member '{2}'.",
-                        valueType, setup.MemberType, setup.MemberName);
+                        valueType, setup.MemberUnderlyingType, setup.MemberName);
                     throw new InvalidCastException(msg, e);
                 }
             }
@@ -198,9 +198,10 @@ namespace cmstar.Data.Dynamic
             if (propInfo != null)
             {
                 var propertyType = propInfo.PropertyType;
-                info.MemberType = propertyType;
+                var underlyingType = ReflectionUtils.GetUnderlyingType(propertyType);
+                info.MemberUnderlyingType = underlyingType;
                 info.NeedConvertType = !propertyType.IsAssignableFrom(dataFieldType);
-                info.IsEnum = propertyType.IsEnum;
+                info.IsEnum = underlyingType.IsEnum;
                 info.CanBeNull = ReflectionUtils.IsNullable(propertyType);
                 info.Setter = PropertyAccessorGenerator.CreateSetter(propInfo);
                 info.MemberName = propInfo.Name;
@@ -209,9 +210,10 @@ namespace cmstar.Data.Dynamic
             {
                 var fieldInfo = (FieldInfo)memberInfo;
                 var fieldType = fieldInfo.FieldType;
-                info.MemberType = fieldInfo.FieldType;
-                info.NeedConvertType = !fieldInfo.FieldType.IsAssignableFrom(dataFieldType);
-                info.IsEnum = fieldType.IsEnum;
+                var underlyingType = ReflectionUtils.GetUnderlyingType(fieldType);
+                info.MemberUnderlyingType = underlyingType;
+                info.NeedConvertType = !fieldType.IsAssignableFrom(dataFieldType);
+                info.IsEnum = underlyingType.IsEnum;
                 info.CanBeNull = ReflectionUtils.IsNullable(fieldType);
                 info.Setter = FieldAccessorGenerator.CreateSetter(fieldInfo);
                 info.MemberName = fieldInfo.Name;
@@ -244,7 +246,7 @@ namespace cmstar.Data.Dynamic
         {
             public int Index;
             public string MemberName;
-            public Type MemberType;
+            public Type MemberUnderlyingType;
             public bool NeedConvertType;
             public bool IsEnum;
             public bool CanBeNull;
