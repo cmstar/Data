@@ -13,6 +13,13 @@ namespace cmstar.Data
     public abstract partial class AbstractDbClient
     {
         /// <summary>
+        /// 获取或设置一个值，该值表示实例内的 *Async 方法是否使用异步执行。
+        /// 当值为<c>true</c>时，实例内的 *Async 方法使用异步执行；否则使用非异步方式执行。
+        /// 默认值为<c>true</c>。
+        /// </summary>
+        public bool AsyncEnabled { get; set; } = true;
+
+        /// <summary>
         /// 获取查询的第一行第一列的值。
         /// 这是一个异步操作。
         /// </summary>
@@ -26,6 +33,9 @@ namespace cmstar.Data
         public virtual async Task<object> ScalarAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
+            if (!AsyncEnabled)
+                return Scalar(sql, parameters, commandType, timeout);
+
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
 
             DbConnection connection = null;
@@ -61,6 +71,9 @@ namespace cmstar.Data
         public virtual async Task<int> ExecuteAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
+            if (!AsyncEnabled)
+                return Execute(sql, parameters, commandType, timeout);
+
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
 
             DbConnection connection = null;
@@ -98,6 +111,12 @@ namespace cmstar.Data
             string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
+            if (!AsyncEnabled)
+            {
+                SizedExecute(expectedSize, sql, parameters, commandType, timeout);
+                return;
+            }
+
             var actualSize = await ExecuteAsync(sql, parameters, commandType, timeout);
             if (actualSize != expectedSize)
                 throw new IncorrectResultSizeException(sql, commandType, parameters, expectedSize, actualSize);
@@ -117,6 +136,9 @@ namespace cmstar.Data
         public virtual async Task<DataTable> DataTableAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
+            if (!AsyncEnabled)
+                return DataTable(sql, parameters, commandType, timeout);
+
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
 
             DbConnection connection = null;
@@ -158,6 +180,9 @@ namespace cmstar.Data
         public virtual async Task<DataSet> DataSetAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
+            if (!AsyncEnabled)
+                return DataSet(sql, parameters, commandType, timeout);
+
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
 
             DbConnection connection = null;
@@ -198,6 +223,9 @@ namespace cmstar.Data
         public virtual async Task<bool> ExistsAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
+            if (!AsyncEnabled)
+                return Exists(sql, parameters, commandType, timeout);
+
             return await ScalarAsync(sql, parameters, commandType, timeout) != null;
         }
 
@@ -220,7 +248,9 @@ namespace cmstar.Data
         public virtual Task<IDataRecord> GetRowAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return GetAsync(SingleRowKeeperMapper.Instance, sql, parameters, commandType, timeout);
+            return AsyncEnabled
+                ? GetAsync(SingleRowKeeperMapper.Instance, sql, parameters, commandType, timeout)
+                : Task.FromResult(Get(SingleRowKeeperMapper.Instance, sql, parameters, commandType, timeout));
         }
 
         /// <summary>
@@ -238,7 +268,9 @@ namespace cmstar.Data
         public virtual Task<object[]> ItemArrayAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
-            return GetAsync(ItemArrayMapper.Instance, sql, parameters, commandType, timeout);
+            return AsyncEnabled
+                ? GetAsync(ItemArrayMapper.Instance, sql, parameters, commandType, timeout)
+                : Task.FromResult(Get(ItemArrayMapper.Instance, sql, parameters, commandType, timeout));
         }
 
         /// <summary>
@@ -256,6 +288,9 @@ namespace cmstar.Data
         public virtual async Task<T> GetAsync<T>(IMapper<T> mapper, string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
+            if (!AsyncEnabled)
+                return Get(mapper, sql, parameters, commandType, timeout);
+
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
             ArgAssert.NotNull(mapper, nameof(mapper));
 
@@ -302,6 +337,9 @@ namespace cmstar.Data
             string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
+            if (!AsyncEnabled)
+                return ForceGet(mapper, sql, parameters, commandType, timeout);
+
             DbConnection connection = null;
             IDataReader reader = null;
             DbCommand cmd = null;
@@ -350,6 +388,9 @@ namespace cmstar.Data
             string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
+            if (!AsyncEnabled)
+                return List(mapper, sql, parameters, commandType, timeout);
+
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
             ArgAssert.NotNull(mapper, nameof(mapper));
 
@@ -391,6 +432,9 @@ namespace cmstar.Data
         public virtual async Task<IEnumerable<IDataRecord>> RowsAsync(string sql, IEnumerable<DbParameter> parameters = null,
             CommandType commandType = CommandType.Text, int timeout = 0)
         {
+            if (!AsyncEnabled)
+                return Rows(sql, parameters, commandType, timeout);
+
             ArgAssert.NotNullOrEmpty(sql, nameof(sql));
 
             DbConnection connection = null;
