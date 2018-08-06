@@ -56,22 +56,20 @@ namespace cmstar.Data
         /// <summary>
         /// 获取出现错误的SQL命令文本。
         /// </summary>
-        public string CommandText { get; private set; }
+        public string CommandText { get; }
 
         /// <summary>
         /// 获取SQL命令的执行类型。
         /// </summary>
-        public CommandType CommandType { get; private set; }
+        public CommandType CommandType { get; }
 
         /// <summary>
         /// 获取SQL命令的参数集合。
         /// </summary>
-        public IList<DbParameter> Parameters { get; private set; }
+        public IList<DbParameter> Parameters { get; }
 
-        public override string Message
-        {
-            get { return _message ?? (_message = BuildMessage()); }
-        }
+        /// <inheritdoc />
+        public override string Message => _message ?? (_message = BuildMessage());
 
         private string BuildMessage()
         {
@@ -105,6 +103,7 @@ namespace cmstar.Data
                         builder.Append(" ").Append(p.ParameterName);
                         builder.Append(" ").Append(p.DbType);
 
+
                         if (p.Size > 0)
                         {
                             builder.Append("(").Append(p.Size).Append(")");
@@ -112,14 +111,7 @@ namespace cmstar.Data
 
                         builder.Append(" ").Append(p.Direction).Append(":");
 
-                        if (p.Value == DBNull.Value)
-                        {
-                            builder.Append("<NULL>");
-                        }
-                        else
-                        {
-                            builder.Append(" ").Append(p.Value);
-                        }
+                        AppendValue(builder, p);
                     }
 
                     builder.Append(" ");
@@ -128,6 +120,32 @@ namespace cmstar.Data
 
             _message = builder.ToString();
             return _message;
+        }
+
+        private void AppendValue(StringBuilder builder, DbParameter p)
+        {
+            var val = p.Value;
+
+            if (val == null || val == DBNull.Value)
+            {
+                builder.Append("<NULL>");
+                return;
+            }
+
+            switch (val)
+            {
+                // binary 数据只输出长度。
+                case byte[] bytes:
+                    builder.Append("Byte[").Append(bytes.Length).Append(']');
+                    break;
+
+                // char[] 输出为 string 。
+                case char[] chars:
+                    builder.Append(chars);
+                    break;
+            }
+
+            builder.Append(p.Value);
         }
     }
 }
