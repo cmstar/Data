@@ -143,9 +143,11 @@ namespace cmstar.Data
                 case char[] chars:
                     builder.Append(chars);
                     break;
-            }
 
-            builder.Append(p.Value);
+                default:
+                    builder.Append(p.Value);
+                    break;
+            }
         }
     }
 }
