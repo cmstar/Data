@@ -517,6 +517,15 @@ namespace cmstar.Data
                 connection.Close();
         }
 
+        /// <summary>
+        /// 创建一个<see cref="DbDataAdapter"/>实例。
+        /// 默认使用<see cref="DbProviderFactory.CreateDataAdapter"/>。
+        /// </summary>
+        protected virtual DbDataAdapter CreateDataAdapter()
+        {
+            return Factory.CreateDataAdapter();
+        }
+
         private DbConnection CreateAndOpenConnection()
         {
             var connection = CreateConnection();
@@ -575,7 +584,7 @@ namespace cmstar.Data
 
         private DataTable FillDataTable(DbCommand command)
         {
-            var dataAdapter = CreateDataAdapter();
+            var dataAdapter = GetDataAdapter();
             var dataTable = new DataTable();
             dataAdapter.SelectCommand = command;
             dataAdapter.Fill(dataTable);
@@ -584,16 +593,16 @@ namespace cmstar.Data
 
         private DataSet FillDataSet(DbCommand command)
         {
-            var dataAdapter = CreateDataAdapter();
+            var dataAdapter = GetDataAdapter();
             var dataSet = new DataSet();
             dataAdapter.SelectCommand = command;
             dataAdapter.Fill(dataSet);
             return dataSet;
         }
 
-        private DbDataAdapter CreateDataAdapter()
+        private DbDataAdapter GetDataAdapter()
         {
-            var dataAdapter = Factory.CreateDataAdapter();
+            var dataAdapter = CreateDataAdapter();
 
             if (dataAdapter == null)
                 throw new NotSupportedException("Cannot create a data-adapter from the underlying DbProviderFactory.");
