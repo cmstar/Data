@@ -517,11 +517,7 @@ namespace cmstar.Data
                 connection.Close();
         }
 
-        /// <summary>
-        /// 创建一个<see cref="DbDataAdapter"/>实例。
-        /// 默认使用<see cref="DbProviderFactory.CreateDataAdapter"/>。
-        /// </summary>
-        protected virtual DbDataAdapter CreateDataAdapter()
+        private DbDataAdapter CreateDataAdapter()
         {
             return Factory.CreateDataAdapter();
         }

@@ -74,21 +74,24 @@
         /// <summary>
         /// 获取当前实例所使用的<see cref="DbProviderFactory"/>实例。
         /// </summary>
-        protected override DbProviderFactory Factory
-        {
-            get { return MySql.Data.MySqlClient.MySqlClientFactory.Instance; }
-        }
+        protected override DbProviderFactory Factory => FixedMySqlClientFactory.Instance;
 
         /// <summary>
-        /// 创建一个<see cref="DbDataAdapter"/>实例。
-        /// </summary>
-        /// <remarks>
         /// 在 MySql.Data 库的早期版本有重写<see cref="DbProviderFactory.CreateDataAdapter"/>，
         /// 但之后又移除了（坑……），我们需要重写此方法，否则使用后期版本的库将返回null。
-        /// </remarks>
-        protected override DbDataAdapter CreateDataAdapter()
+        /// </summary>
+        private class FixedMySqlClientFactory : DbProviderFactoryWrapper
         {
-            return new MySql.Data.MySqlClient.MySqlDataAdapter();
+            public static readonly FixedMySqlClientFactory Instance = new FixedMySqlClientFactory();
+
+            private FixedMySqlClientFactory() : base(MySqlClientFactory.Instance)
+            {
+            }
+
+            public override DbDataAdapter CreateDataAdapter()
+            {
+                return new MySqlDataAdapter();
+            }
         }
     }
 
