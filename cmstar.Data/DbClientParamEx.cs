@@ -81,9 +81,9 @@ namespace cmstar.Data
         /// <param name="name">参数的名称。</param>
         /// <param name="value">参数的值。</param>
         /// <param name="typeRef">
-        /// 参考类型，用于判断<see cref="DbParameter.DbType"/>的值。
-        /// 若为 null，且<paramref name="value"/>不为 null，则使用 value.GetType() 作为参考类型；
-        /// 若<paramref name="value"/>也为 null，则使用<see cref="UnknownTypeDbNull"/>方法的返回值。
+        /// 当<paramref name="value"/>不为 null 时，使用其类型确定<see cref="DbParameter.DbType"/>的值；
+        /// 当<paramref name="value"/>为 null 时，使用<paramref name="typeRef"/>确定<see cref="DbParameter.DbType"/>的值；
+        /// 若<paramref name="value"/>和<paramref name="typeRef"/>都是 null 时，使用<see cref="UnknownTypeDbNull"/>方法的返回值。
         /// </param>
         /// <returns><see cref="DbParameter"/>的实例。</returns>
         public static DbParameter CreateParameter(this IDbClient client, string name, object value, Type typeRef = null)
@@ -95,21 +95,64 @@ namespace cmstar.Data
 
         private static DbParameter CreateParameterInternal(IDbClient client, object value, Type typeRef)
         {
-            // 若值为 null，又没有给定参考类型，就不能知道是何类型的，只能固定给一个值。
-            if (value == null && typeRef == null)
-                return UnknownTypeDbNull(client);
-
-            // 字符串需要单独对待。
-            var dbString = value as DbString;
-            if (dbString != null)
+            // DbString 作为一个内置的特殊类型，单独处理。
+            if (value is DbString dbString)
                 return CreateParameterForDbString(client, dbString);
 
             // 如果值本身就是 DbParameter，直接采用之，不用创建新的了。
-            var param = value as DbParameter;
-            if (param != null)
-                return param;
+            if (value is DbParameter dbParameter)
+                return dbParameter;
 
-            return CreateParameterForMultipleTypes(client, value, typeRef);
+            DbType dbType;
+            DbParameter p;
+
+            if (value == null)
+            {
+                // 若值为 null，又没有给定参考类型，就不能知道是何类型的，只能固定给一个值。
+                if (typeRef == null)
+                    return UnknownTypeDbNull(client);
+
+                dbType = LookupDbType(typeRef);
+                p = client.CreateParameter();
+
+                // 小心 null，需要转为 DBNull，否则值为 CLR null 的参数会被忽略。
+                p.Value = DBNull.Value;
+
+                // 对于 null 且类型是字符串的情况，总是给定 AnsiString。
+                // 因为 String 可以兼容 AnsiString，反向却不一定。
+                p.DbType = dbType == DbType.String ? DbType.AnsiString : dbType;
+
+                return p;
+            }
+
+            dbType = LookupDbType(value.GetType());
+            p = client.CreateParameter();
+
+            p.DbType = dbType;
+            p.Value = value;
+
+            // 若不指定字符串长度，参数带有的默认长度可能导致两种情况：
+            // 1. 参数内指定的长度（Size）等于参数值的长度（Length）；
+            // 2. 参数内指定的长度等价于 MAX 。
+            // 由于每次给定的值可能不一样，不定长或 MAX 长度会导致如 SQLServer 数据库执行计划不能复用，进而影响性能。
+            // 因为这里不能知道数据库的字段定义是多长，只能给出一个较为稳定的长度：
+            // 1. 它足够长，多数的值长度都能涵盖在内；
+            // 2. 它不会太长，例如长于 SQLServer 所允许的 NVARCHAR 列的最大可索引长度 4000 。
+            if (value is string stringValue && stringValue.Length <= DbString.DefaultLength)
+            {
+                p.Size = DbString.DefaultLength;
+            }
+
+            return p;
+        }
+
+        private static DbType LookupDbType(Type type)
+        {
+            var dbType = DbTypeConvert.LookupDbType(type);
+            if (dbType == DbTypeConvert.NotSupporteDbType)
+                throw new NotSupportedException($"The type {type} can not be converted to DbType.");
+
+            return dbType;
         }
 
         private static DbParameter CreateParameterForDbString(IDbClient client, DbString dbString)
@@ -139,40 +182,6 @@ namespace cmstar.Data
             }
 
             return param;
-        }
-
-        private static DbParameter CreateParameterForMultipleTypes(IDbClient client, object value, Type typeRef)
-        {
-            var type = typeRef ?? value.GetType();
-            var dbType = DbTypeConvert.LookupDbType(type);
-
-            if (dbType == DbTypeConvert.NotSupporteDbType)
-                throw new NotSupportedException($"The type {type} can not be converted to DbType.");
-
-            var p = client.CreateParameter();
-
-            if (value == null)
-            {
-                // 小心 null，需要转为 DBNull，否则值为 CLR null 的参数会被忽略。
-                p.Value = DBNull.Value;
-
-                // 对于 null 且类型是字符串的情况，总是给定 AnsiString。
-                // 因为 String 可以兼容 AnsiString，反向却不一定。
-                p.DbType = dbType == DbType.String ? DbType.AnsiString : dbType;
-            }
-            else
-            {
-                p.DbType = dbType;
-                p.Value = value;
-
-                var stringValue = value as string;
-                if (stringValue != null && stringValue.Length <= DbString.DefaultLength)
-                {
-                    p.Size = DbString.DefaultLength;
-                }
-            }
-
-            return p;
         }
     }
 }
