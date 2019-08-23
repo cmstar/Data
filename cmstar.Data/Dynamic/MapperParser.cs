@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
+using System.Diagnostics;
 using cmstar.Data.Reflection;
+using cmstar.Data.Reflection.Emit;
 
 namespace cmstar.Data.Dynamic
 {
@@ -23,6 +25,9 @@ namespace cmstar.Data.Dynamic
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 return (IMapper<T>)ParseNullableTypeMapper<T>(template);
 
+            if (type.IsEnum)
+                return EnumMapper<T>.Instance;
+
             if (typeof(IConvertible).IsAssignableFrom(type))
                 return Mappers.Convertible<T>();
 
@@ -32,25 +37,40 @@ namespace cmstar.Data.Dynamic
         private static object ParseNullableTypeMapper<T>(IDataRecord template)
         {
             var underlyingType = Nullable.GetUnderlyingType(typeof(T));
-            object underlyingMapper;
+            Debug.Assert(underlyingType != null, nameof(underlyingType) + " != null");
 
-            if (typeof(IConvertible).IsAssignableFrom(underlyingType))
+            object valueMapper;
+            if (underlyingType.IsEnum)
             {
-                var method = typeof(Mappers).GetMethod("Convertible", new[] { typeof(string) });
-                var genericMethod = method.MakeGenericMethod(new[] { underlyingType });
-                underlyingMapper = genericMethod.Invoke(null, new object[] { null });
+                var underlyingMapperType = typeof(EnumMapper<>).MakeGenericType(underlyingType);
+                var field = underlyingMapperType.GetField(nameof(EnumMapper<int>.Instance));
+                valueMapper = field.GetValue(null);
+            }
+            else if (typeof(IConvertible).IsAssignableFrom(underlyingType))
+            {
+                valueMapper = CreateConvertibleTypeMapper(underlyingType);
             }
             else
             {
                 var underlyingMapperType = typeof(ObjectMapper<>).MakeGenericType(underlyingType);
-                underlyingMapper = Activator.CreateInstance(underlyingMapperType, template);
+                valueMapper = Activator.CreateInstance(underlyingMapperType, template);
             }
 
             var nullableTypeMapper = Activator.CreateInstance(
                 typeof(NullableTypeMapper<,>).MakeGenericType(new[] { typeof(T), underlyingType }),
-                underlyingMapper);
+                valueMapper);
 
             return nullableTypeMapper;
+        }
+
+        private static object CreateConvertibleTypeMapper(Type type)
+        {
+            var method = typeof(Mappers).GetMethod(nameof(Mappers.Convertible), new[] { typeof(string) });
+            Debug.Assert(method != null, nameof(method) + " != null");
+
+            var genericMethod = method.MakeGenericMethod(type);
+            var mapper = genericMethod.Invoke(null, new object[] { null });
+            return mapper;
         }
 
         private class NullableTypeMapper<TNullable, TUnderlying> : IMapper<TNullable>
@@ -74,6 +94,32 @@ namespace cmstar.Data.Dynamic
                 // can not avoid box & unbox here...
                 object res = _underlyingMapper.MapRow(record, rowNum);
                 return (TNullable)res;
+            }
+        }
+
+        private class EnumMapper<T> : IMapper<T>
+        {
+            public static readonly EnumMapper<T> Instance = new EnumMapper<T>();
+
+            private readonly object _underlyingTypeMapper;
+            private readonly Func<object, object[], object> _mapRowCaller;
+
+            private EnumMapper()
+            {
+                var underlyingType = Enum.GetUnderlyingType(typeof(T));
+                _underlyingTypeMapper = CreateConvertibleTypeMapper(underlyingType);
+
+                var mapRowMethod = _underlyingTypeMapper.GetType().GetMethod(nameof(IMapper<int>.MapRow));
+                Debug.Assert(mapRowMethod != null, nameof(mapRowMethod) + " != null");
+
+                _mapRowCaller = MethodInvokerGenerator.CreateDelegate(mapRowMethod);
+            }
+
+            public T MapRow(IDataRecord record, int rowNum)
+            {
+                var index = _mapRowCaller(_underlyingTypeMapper, new object[] { record, rowNum });
+                var value = Enum.ToObject(typeof(T), index);
+                return (T)value;
             }
         }
     }
