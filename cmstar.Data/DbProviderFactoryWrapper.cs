@@ -1,6 +1,9 @@
 ﻿using System.Data.Common;
+
+#if !NETSTANDARD
 using System.Security;
 using System.Security.Permissions;
+#endif
 
 namespace cmstar.Data
 {
@@ -66,11 +69,13 @@ namespace cmstar.Data
             return _underlyingProvider.CreateParameter();
         }
 
+#if !NETSTANDARD
         /// <inheritdoc />
         public override CodeAccessPermission CreatePermission(PermissionState state)
         {
             return _underlyingProvider.CreatePermission(state);
         }
+#endif
 
         /// <inheritdoc />
         public override bool Equals(object obj)

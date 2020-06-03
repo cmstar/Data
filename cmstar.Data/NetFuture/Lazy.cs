@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NET35
+using System;
 
 namespace cmstar.Data.NetFuture
 {
@@ -47,3 +48,4 @@ namespace cmstar.Data.NetFuture
         }
     }
 }
+#endif
