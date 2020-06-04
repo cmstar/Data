@@ -14,10 +14,12 @@ namespace cmstar.Data.Dynamic
     /// the specified type <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">The type which the data is mapped to.</typeparam>
-    internal class ObjectMapper<T> : IMapper<T>
+    public class ObjectMapper<T> : IMapper<T>
     {
         private readonly Func<object> _targetConstructor;
-        private readonly IList<MemberSetupInfo> _targetMemberSetups;
+
+        private int _templateFieldCount;
+        private IList<MemberSetupInfo> _targetMemberSetups;
 
         /// <summary>
         /// Initialize a new instance of <see cref="ObjectMapper{T}"/> with
@@ -32,39 +34,14 @@ namespace cmstar.Data.Dynamic
             var type = typeof(T);
 
             _targetConstructor = ConstructorInvokerGenerator.CreateDelegate(type);
-
-            var props = type
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(x => x.CanWrite);
-
-#if NET35
-            var propMap = MakeMemberMap(props.Cast<MemberInfo>());
-#else
-            var propMap = MakeMemberMap(props);
-#endif
-
-            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
-            var fieldMap = MakeMemberMap(fields);
-
-            _targetMemberSetups = new List<MemberSetupInfo>();
-            var flags = new bool[template.FieldCount]; // all false
-
-            // 3-level match:
-            // use a strict match
-            Func<string, string, bool> fieldNameMemberNameMatches = (f, m) => f == m;
-            AppendMemberSetups(template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
-
-            // use a case-insensitive match
-            fieldNameMemberNameMatches = (f, m) => StringComparer.OrdinalIgnoreCase.Compare(f, m) == 0;
-            AppendMemberSetups(template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
-
-            // compare by the underlying name of the field
-            fieldNameMemberNameMatches = (f, m) => StringComparer.OrdinalIgnoreCase.Compare(GetUnderlyingName(f), m) == 0;
-            AppendMemberSetups(template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
+            _targetMemberSetups = ParseMembers(type, template);
+            _templateFieldCount = template.FieldCount;
         }
 
         public T MapRow(IDataRecord record, int rowNum)
         {
+            ValidateTemplate(record);
+
             // don't cast obj to T here, if T is value type, a box is needed
             // since the value type will be clone into a box wrapper during boxing
             var obj = _targetConstructor();
@@ -77,7 +54,7 @@ namespace cmstar.Data.Dynamic
 
                 // deal with DBNull, consider that DBNull should be mapped to CLR null,
                 // but *NOT* for value types.
-                // Users should use Nullable<> (e.g. int?) types to accept DBNulls.
+                // Users should use Nullable<> (e.g. int?) types for DBNulls.
                 if (value == DBNull.Value)
                 {
                     if (setup.CanBeNull)
@@ -129,8 +106,58 @@ namespace cmstar.Data.Dynamic
             return (T)obj; // if T is value type, it is unboxed here
         }
 
+        // Check the data row, if the row differs from the original template,
+        // reparse MemberSetupInfo from the new row.
+        // If a columns was added or removed from a table, some SQL, such as
+        // 'SELECT * FROM some_table' will output difference result, which may
+        // break up the MapRow method.
+        private void ValidateTemplate(IDataRecord template)
+        {
+            // Currently we only check the field count.
+            // Checking the field type for each column may be too slow.
+            if (template.FieldCount == _templateFieldCount)
+                return;
+
+            var type = typeof(T);
+            _targetMemberSetups = ParseMembers(type, template);
+            _templateFieldCount = template.FieldCount;
+        }
+
+        private static IList<MemberSetupInfo> ParseMembers(Type type, IDataRecord template)
+        {
+            var props = type
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(x => x.CanWrite);
+
+#if NET35
+            var propMap = MakeMemberMap(props.Cast<MemberInfo>());
+#else
+            var propMap = MakeMemberMap(props);
+#endif
+
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+            var fieldMap = MakeMemberMap(fields);
+            var targetMemberSetups = new List<MemberSetupInfo>();
+            var flags = new bool[template.FieldCount]; // all false
+
+            // 3-level match:
+            // use a strict match
+            Func<string, string, bool> fieldNameMemberNameMatches = (f, m) => f == m;
+            AppendMemberSetups(targetMemberSetups, template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
+
+            // use a case-insensitive match
+            fieldNameMemberNameMatches = (f, m) => StringComparer.OrdinalIgnoreCase.Compare(f, m) == 0;
+            AppendMemberSetups(targetMemberSetups, template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
+
+            // compare by the underlying name of the field
+            fieldNameMemberNameMatches = (f, m) => StringComparer.OrdinalIgnoreCase.Compare(GetUnderlyingName(f), m) == 0;
+            AppendMemberSetups(targetMemberSetups, template, flags, propMap, fieldMap, fieldNameMemberNameMatches);
+
+            return targetMemberSetups;
+        }
+
         // groups memberInfos by the lowercase name
-        private Dictionary<string, List<MemberInfo>> MakeMemberMap(IEnumerable<MemberInfo> memberInfos)
+        private static Dictionary<string, List<MemberInfo>> MakeMemberMap(IEnumerable<MemberInfo> memberInfos)
         {
             var map = new Dictionary<string, List<MemberInfo>>();
 
@@ -156,7 +183,8 @@ namespace cmstar.Data.Dynamic
         // Scan the template record with an array of flags in which true means the field at the
         // corresbonding index has already been used by a MemberSetupInfo and should be ingored.
         // Then, find a member with a matched name and setup.
-        private void AppendMemberSetups(IDataRecord template, bool[] flags,
+        private static void AppendMemberSetups(
+            List<MemberSetupInfo> memberSetups, IDataRecord template, bool[] flags,
             Dictionary<string, List<MemberInfo>> propMap, Dictionary<string, List<MemberInfo>> fieldMap,
             Func<string, string, bool> fieldNameMemberNameMatches)
         {
@@ -182,7 +210,7 @@ namespace cmstar.Data.Dynamic
                         continue;
 
                     var dataFieldType = template.GetFieldType(i);
-                    _targetMemberSetups.Add(BuildSetupInfo(i, dataFieldType, member));
+                    memberSetups.Add(BuildSetupInfo(i, dataFieldType, member));
                     members.RemoveAt(j);
                     flags[i] = true;
                     break;
@@ -190,7 +218,7 @@ namespace cmstar.Data.Dynamic
             }
         }
 
-        private MemberSetupInfo BuildSetupInfo(int dataColIndex, Type dataFieldType, MemberInfo memberInfo)
+        private static MemberSetupInfo BuildSetupInfo(int dataColIndex, Type dataFieldType, MemberInfo memberInfo)
         {
             var info = new MemberSetupInfo { Index = dataColIndex };
 
@@ -224,7 +252,7 @@ namespace cmstar.Data.Dynamic
 
         // gets a name that ignores the internal underline character and then to lower case
         // e.g. _Abc_deF => _abcdef
-        private string GetUnderlyingName(string name)
+        private static string GetUnderlyingName(string name)
         {
             var sb = new StringBuilder(name.Length);
 
