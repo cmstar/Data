@@ -183,6 +183,21 @@ namespace cmstar.Data
         }
 
         /// <summary>
+        /// 查询并根据结果创建目标类型的实例，由一个模板对象指定目标类型。
+        /// 若满足条件的记录不存在，返回目标类型的默认值（对于引用类型为<c>null</c>）。
+        /// </summary>
+        /// <typeparam name="T">查询的目标类型。</typeparam>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
+        /// <param name="template">用于指定目标类型的模板对象。</param>
+        /// <param name="sql">SQL语句。</param>
+        /// <param name="param">参数表。</param>
+        /// <returns>目标类型的实例。</returns>
+        public static T IxTemplateGet<T>(this IDbClient client, T template, string sql, params object[] param)
+        {
+            return IxGet<T>(client, sql, param);
+        }
+
+        /// <summary>
         /// 查询并根据结果创建目标类型的实例。
         /// 若满足条件的记录不存在，返回目标类型的默认值（对于引用类型为<c>null</c>）。
         /// </summary>
@@ -205,6 +220,21 @@ namespace cmstar.Data
             var mapper = MapperParser.Parse<T>(row);
             CommandCache.Set(identity, new CommandCacheItem { Mapper = mapper });
             return mapper.MapRow(row, 1);
+        }
+
+        /// <summary>
+        /// 查询并根据结果创建目标类型的实例，由一个模板对象指定目标类型。
+        /// SQL命中的记录必须为1行，否则抛出异常。
+        /// </summary>
+        /// <typeparam name="T">查询的目标类型。</typeparam>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
+        /// <param name="template">用于指定目标类型的模板对象。</param>
+        /// <param name="sql">SQL语句。</param>
+        /// <param name="param">参数表。</param>
+        /// <returns>目标类型的实例。</returns>
+        public static T IxTemplateForceGet<T>(this IDbClient client, T template, string sql, params object[] param)
+        {
+            return IxForceGet<T>(client, sql, param);
         }
 
         /// <summary>

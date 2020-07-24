@@ -178,6 +178,22 @@ namespace cmstar.Data
         }
 
         /// <summary>
+        /// 查询并根据结果创建目标类型的实例，由一个模板对象指定目标类型。
+        /// 若满足条件的记录不存在，返回目标类型的默认值（对于引用类型为<c>null</c>）。
+        /// 这是一个异步操作。
+        /// </summary>
+        /// <typeparam name="T">查询的目标类型。</typeparam>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
+        /// <param name="template">用于指定目标类型的模板对象。</param>
+        /// <param name="sql">SQL语句。</param>
+        /// <param name="param">参数表。</param>
+        /// <returns>目标类型的实例。</returns>
+        public static Task<T> IxTemplateGetAsync<T>(this IDbClient client, T template, string sql, params object[] param)
+        {
+            return IxGetAsync<T>(client, sql, param);
+        }
+
+        /// <summary>
         /// 查询并根据结果创建目标类型的实例。
         /// 若满足条件的记录不存在，返回目标类型的默认值（对于引用类型为<c>null</c>）。
         /// 这是一个异步操作。
@@ -204,6 +220,22 @@ namespace cmstar.Data
         }
 
         /// <summary>
+        /// 查询并根据结果创建目标类型的实例，由一个模板对象指定目标类型。
+        /// SQL命中的记录必须为1行，否则抛出异常。
+        /// 这是一个异步操作。
+        /// </summary>
+        /// <typeparam name="T">查询的目标类型。</typeparam>
+        /// <param name="client"><see cref="IDbClient"/>的实例。</param>
+        /// <param name="template">用于指定目标类型的模板对象。</param>
+        /// <param name="sql">SQL语句。</param>
+        /// <param name="param">参数表。</param>
+        /// <returns>目标类型的实例。</returns>
+        public static Task<T> IxTemplateForceGetAsync<T>(this IDbClient client, T template, string sql, params object[] param)
+        {
+            return IxForceGetAsync<T>(client, sql, param);
+        }
+
+        /// <summary>
         /// 查询并根据结果创建目标类型的实例。
         /// SQL命中的记录必须为1行，否则抛出异常。
         /// 这是一个异步操作。
@@ -222,7 +254,7 @@ namespace cmstar.Data
                 return await IxForceGetAsync(client, (IMapper<T>)cache.Mapper, sql, param);
 
             var dbParam = GenerateParameters(client, param).ToList();
-            var rows = await IxRowsAsync(client, sql, dbParam);
+            var rows = await client.RowsAsync(sql, dbParam);
 
             IDataRecord row;
             int rowCount;
