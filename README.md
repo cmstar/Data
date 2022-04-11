@@ -6,203 +6,211 @@
 ### 获取IDbClient
 
 在开始之前，先添加一个数据库访问入口。当然，也可以使用任何你喜欢的方式来创建IDbClient（的实现类）实例。
+```csharp
+public static class Db
+{
+    private static readonly Dictionary<string, IDbClient> KnownClients
+        = new Dictionary<string, IDbClient>();
 
-    public static class Db
+    public static IDbClient Northwind
     {
-        private static readonly Dictionary<string, IDbClient> KnownClients
-            = new Dictionary<string, IDbClient>();
-
-        public static IDbClient Northwind
+        get
         {
-            get 
-            {
-                return GetClient("Northwind", "server=.;database=Northwind;trusted_connection=true;");
-            }
+            return GetClient("Northwind", "server=.;database=Northwind;trusted_connection=true;");
         }
+    }
 
-        private static IDbClient GetClient(string name, string connectionString)
+    private static IDbClient GetClient(string name, string connectionString)
+    {
+        IDbClient client;
+        if (KnownClients.TryGetValue(name, out client))
+            return client;
+
+        lock (KnownClients)
         {
-            IDbClient client;
             if (KnownClients.TryGetValue(name, out client))
                 return client;
 
-            lock (KnownClients)
-            {
-                if (KnownClients.TryGetValue(name, out client))
-                    return client;
-
-                // 创建IDbClient的实例
-                client = new SqlDbClient(connectionString);
-                KnownClients.Add(name, client);
-            }
-
-            return client;
+            // 创建IDbClient的实例
+            client = new SqlDbClient(connectionString);
+            KnownClients.Add(name, client);
         }
+
+        return client;
     }
+}
+```
 
 现在，可以使用`Db.Northwind`来访问SQLServer的Northwind示例数据库了。
 
 ### 访问其他数据库
 
 如果要访问MySql，可以用几行代码实现一个面向MySql的`IDbClient`实现。下面以使用 MySql.Data.dll 作为MySql .net客户端提供器为例。
+```csharp
+/// <summary>
+/// Mysql数据库访问客户端。
+/// </summary>
+public class MysqlDbClient : AbstractDbClient
+{
+    private readonly string _connectionString;
 
     /// <summary>
-    /// Mysql数据库访问客户端。
+    /// 使用指定的数据库类型和连接字符串初始化<see cref="SqlDbClient"/>的新实例。
     /// </summary>
-    public class MysqlDbClient : AbstractDbClient
+    /// <param name="connectionString">连接字符串。</param>
+    public MysqlDbClient(string connectionString)
     {
-        private readonly string _connectionString;
-
-        /// <summary>
-        /// 使用指定的数据库类型和连接字符串初始化<see cref="SqlDbClient"/>的新实例。
-        /// </summary>
-        /// <param name="connectionString">连接字符串。</param>
-        public MysqlDbClient(string connectionString)
-        {
-            ArgAssert.NotNullOrEmptyOrWhitespace(connectionString, "connectionString");
-            _connectionString = connectionString;
-        }
-
-        /// <summary>
-        /// 获取当前实例所使用的数据库连接字符串。
-        /// </summary>
-        public override string ConnectionString
-        {
-            get { return _connectionString; }
-        }
-
-        /// <summary>
-        /// 获取当前实例所使用的<see cref="DbProviderFactory"/>实例。
-        /// </summary>
-        protected override DbProviderFactory Factory => FixedMySqlClientFactory.Instance;
-
-        /// <summary>
-        /// 在 MySql.Data 库的早期版本有重写<see cref="DbProviderFactory.CreateDataAdapter"/>，
-        /// 但之后又移除了（坑……），我们需要重写此方法，否则使用后期版本的库将返回null。
-        /// </summary>
-        private class FixedMySqlClientFactory : DbProviderFactoryWrapper
-        {
-            public static readonly FixedMySqlClientFactory Instance = new FixedMySqlClientFactory();
-
-            private FixedMySqlClientFactory() : base(MySqlClientFactory.Instance)
-            {
-            }
-
-            public override DbDataAdapter CreateDataAdapter()
-            {
-                return new MySqlDataAdapter();
-            }
-        }
+        ArgAssert.NotNullOrEmptyOrWhitespace(connectionString, "connectionString");
+        _connectionString = connectionString;
     }
 
-现在可以创建MySql的访问客户端了：
+    /// <summary>
+    /// 获取当前实例所使用的数据库连接字符串。
+    /// </summary>
+    public override string ConnectionString
+    {
+        get { return _connectionString; }
+    }
 
-    IDbClient client = new MysqlDbClient("server=.;database=MySqlDb;uid=user;pwd=password");
+    /// <summary>
+    /// 获取当前实例所使用的<see cref="DbProviderFactory"/>实例。
+    /// </summary>
+    protected override DbProviderFactory Factory => FixedMySqlClientFactory.Instance;
+
+    /// <summary>
+    /// 在 MySql.Data 库的早期版本有重写<see cref="DbProviderFactory.CreateDataAdapter"/>，
+    /// 但之后又移除了（坑……），我们需要重写此方法，否则使用后期版本的库将返回null。
+    /// </summary>
+    private class FixedMySqlClientFactory : DbProviderFactoryWrapper
+    {
+        public static readonly FixedMySqlClientFactory Instance = new FixedMySqlClientFactory();
+
+        private FixedMySqlClientFactory() : base(MySqlClientFactory.Instance)
+        {
+        }
+
+        public override DbDataAdapter CreateDataAdapter()
+        {
+            return new MySqlDataAdapter();
+        }
+    }
+}
+```
+
+现在可以创建MySql的访问客户端了：
+```csharp
+IDbClient client = new MysqlDbClient("server=.;database=MySqlDb;uid=user;pwd=password");
+```
 
 类似的，可以创建访问Oracle，Sqlite或是其他数据库的客户端，只需要找到对应的`DbProviderFactory`实例即可。
 
 ## 基本数据库操作
 
 ### 基础CRUD
+```csharp
+// 查询
+string productName = (string)Db.Northwind.Scalar(
+    "SELECT ProductName FROM Products WHERE ProductID=115");
 
-    // 查询
-    string productName = (string)Db.Northwind.Scalar(
-        "SELECT ProductName FROM Products WHERE ProductID=115");
-    
-    DataTable productTable = Db.Northwind.DataTable("SELECT * FROM Products");
+DataTable productTable = Db.Northwind.DataTable("SELECT * FROM Products");
 
-    // 更新
-    int affectedRows = Db.Northwind.Execute(
-        "UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
+// 更新
+int affectedRows = Db.Northwind.Execute(
+    "UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
 
-    // 在没有命中一行的时候抛出异常
-    int expectedSize = 1;
-    Db.Northwind.SizedExecute(
-        expectedSize, "UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
+// 在没有命中一行的时候抛出异常
+int expectedSize = 1;
+Db.Northwind.SizedExecute(
+    expectedSize, "UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
 
-    // 获取一行
-    IDataRecord record = Db.Northwind.GetRow(
-        "SELECT ProductName, SupplierID FROM Products WHERE ProductID=115");
+// 获取一行
+IDataRecord record = Db.Northwind.GetRow(
+    "SELECT ProductName, SupplierID FROM Products WHERE ProductID=115");
 
-    int supplierId = Convert.ToInt32(record["SupplierID"]);
+int supplierId = Convert.ToInt32(record["SupplierID"]);
 
-    // 获取一行，仅获取元素值
-    object[] itemArray = Db.Northwind.ItemArray(
-        "SELECT ProductName, SupplierID FROM Products WHERE ProductID=1");
+// 获取一行，仅获取元素值
+object[] itemArray = Db.Northwind.ItemArray(
+    "SELECT ProductName, SupplierID FROM Products WHERE ProductID=1");
 
-    supplierId = Convert.ToInt32(itemArray[1]);
+supplierId = Convert.ToInt32(itemArray[1]);
 
-    // 在不用在意资源释放的情况下使用DataReader，利用了foreach的机制，在循环结束后DataReader会自动关闭
-    IEnumerable<IDataRecord> rows = Db.Northwind.Rows(
-        "SELECT ProductName, SupplierID FROM Products WHERE ProductID IN (1, 2, 3)");
-    foreach (IDataRecord row in rows)
-    {
-        Console.WriteLine(row["ProductName"]);
-    }
+// 在不用在意资源释放的情况下使用DataReader，利用了foreach的机制，在循环结束后DataReader会自动关闭
+IEnumerable<IDataRecord> rows = Db.Northwind.Rows(
+    "SELECT ProductName, SupplierID FROM Products WHERE ProductID IN (1, 2, 3)");
+foreach (IDataRecord row in rows)
+{
+    Console.WriteLine(row["ProductName"]);
+}
+```
 
 ### 使用参数和调用存储过程
+```csharp
+// 使用参数
+DbParameter parameter = Db.Northwind.CreateParameter();
+parameter.DbType = DbType.String;
+parameter.ParameterName = "CustomerID";
+parameter.Value = "ALFKI";
+parameter.Direction = ParameterDirection.Input;
 
-    // 使用参数
-    DbParameter parameter = Db.Northwind.CreateParameter();
-    parameter.DbType = DbType.String;
-    parameter.ParameterName = "CustomerID";
-    parameter.Value = "ALFKI";
-    parameter.Direction = ParameterDirection.Input;
-    
-    // 调用存储过程 CustOrderHist @CustomerID
-    DataSet ds = Db.Northwind.DataSet(
-        "CustOrderHist", new[] { parameter }, CommandType.StoredProcedure);
+// 调用存储过程 CustOrderHist @CustomerID
+DataSet ds = Db.Northwind.DataSet(
+    "CustOrderHist", new[] { parameter }, CommandType.StoredProcedure);
 
-    // 使用DbClientParamEx中的扩展方法快速创建参数（需要using Data命名空间）
-    DbParameter[] parameters = new[] 
-    {
-        Db.Northwind.CreateParameter("id", DbType.Int32, 115, direction: ParameterDirection.Input),
-        Db.Northwind.CreateParameter("name", DbType.String, "Ikura", 5)
-    };
-    Db.Northwind.DataSet("SELECT * FROM Products WHERE ProductName=@name OR ProductID=@id", parameters);
+// 使用DbClientParamEx中的扩展方法快速创建参数（需要using Data命名空间）
+DbParameter[] parameters = new[] 
+{
+    Db.Northwind.CreateParameter("id", DbType.Int32, 115, direction: ParameterDirection.Input),
+    Db.Northwind.CreateParameter("name", DbType.String, "Ikura", 5)
+};
+Db.Northwind.DataSet("SELECT * FROM Products WHERE ProductName=@name OR ProductID=@id", parameters);
+```
 
 ### 使用Mapper
 
 `IMapper<T>`接口定义了从`IDataRecord`到`T`类型的映射，可以用过实现该接口，以便从数据库读取并创建特定类型实例及实例的集合。
+```csharp
+public class Product
+{
+    public int ProductID;
+    public string ProductName;
+}
 
-    public class Product
+public class ProductMapper : IMapper<Product>
+{
+    public Product MapRow(IDataRecord record, int rowNum)
     {
-        public int ProductID;
-        public string ProductName; 
+        var product = new Product();
+        product.ProductID = Convert.ToInt32(record["ProductID"]);
+        product.ProductName = record["ProductName"].ToString();
+        return product;
     }
-
-    public class ProductMapper : IMapper<Product>
-    {
-        public Product MapRow(IDataRecord record, int rowNum)
-        {
-            var product = new Product();
-            product.ProductID = Convert.ToInt32(record["ProductID"]);
-            product.ProductName = record["ProductName"].ToString();
-            return product;
-        }
-    }
+}
+```
 
 利用上面的`ProductMapper`，我们可以直接从查询中创建`Product`实例了。
+```csharp
+// 获取一个实例
+Product product = Db.Northwind.Get(
+    new ProductMapper(), "SELECT * FROM Products WHERE ProductID=115");
 
-    // 获取一个实例
-    Product product = Db.Northwind.Get(
-        new ProductMapper(), "SELECT * FROM Products WHERE ProductID=115");
-
-    // 获取实例的集合
-    IList<Product> products = Db.Northwind.List(new ProductMapper(), "SELECT * FROM Products");
+// 获取实例的集合
+IList<Product> products = Db.Northwind.List(new ProductMapper(), "SELECT * FROM Products");
+```
 
 `Mappers`类中已经定义了部分简单类型的Mapper实现，以便实现便捷的查询。
+```csharp
+// 使用已定义好的简单Mapper
+IList<string> productNames = Db.Northwind.List(
+    Mappers.String(), "SELECT ProductName FROM Products");
 
-    // 使用已定义好的简单Mapper
-    IList<string> productNames = Db.Northwind.List(
-        Mappers.String(), "SELECT ProductName FROM Products");
+IList<int> productIds = Db.Northwind.List(
+    Mappers.Int32(), "SELECT ProductID FROM Products");
 
-    IList<int> productIds = Db.Northwind.List(
-        Mappers.Int32(), "SELECT ProductID FROM Products");
-    
-    // 使用实现IConvertible的类型创建Mapper
-    IList<DateTime> orderDates = Db.Northwind.List(
-        Mappers.Convertible<DateTime>(), "SELECT OrderDate FROM Orders");
+// 使用实现IConvertible的类型创建Mapper
+IList<DateTime> orderDates = Db.Northwind.List(
+    Mappers.Convertible<DateTime>(), "SELECT OrderDate FROM Orders");
+```
 
 ### 使用事务
 
@@ -211,15 +219,15 @@
 事务的最后，别忘了`Commit`。
 
 `ITransactionKeeper`同时也实现了`IDisposable`接口，其`Dispose`方法能够在事务没有提交时进行事务回滚（如果已经提交，则什么也不做），利用这个机制和C#的using语法，可以很方便的编写一个在出现异常时回滚的事务操作。
+```csharp
+using (ITransactionKeeper tran = Db.Northwind.CreateTransaction())
+{
+    tran.Execute("UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
+    tran.Execute("UPDATE Products SET ProductName='The Name2' WHERE ProductID=118");
 
-    using (ITransactionKeeper tran = Db.Northwind.CreateTransaction())
-    {
-        tran.Execute("UPDATE Products SET ProductName='The Name' WHERE ProductID=115");
-        tran.Execute("UPDATE Products SET ProductName='The Name2' WHERE ProductID=118");
-                
-        tran.Commit();
-    }
-
+    tran.Commit();
+}
+```
 
 ## ObjectiveExtension扩展方法
 
@@ -230,28 +238,31 @@
 这些扩展方法具有与`IDbClient`中的方法很类似的签名，但能够接收一个用于存放参数信息的.net对象，以节省许多编码量（是的，和Dapper、ServiceStack.OrmLite很相似）。
 
 通过这些扩展方法，上面使用参数的示例可以这样写了：
+```csharp
+DataSet ds = Db.Northwind.DataSet(
+    "CustOrderHist", new { CustomerID = "ALFKI" }, CommandType.StoredProcedure);
 
-    DataSet ds = Db.Northwind.DataSet(
-        "CustOrderHist", new { CustomerID = "ALFKI" }, CommandType.StoredProcedure);
-
-    DataTable dt = Db.Northwind.DataTable(
-        "SELECT * FROM Products WHERE ProductName=@name OR ProductID=@id",
-        new { name = "Ikura", id = 115 });
+DataTable dt = Db.Northwind.DataTable(
+    "SELECT * FROM Products WHERE ProductName=@name OR ProductID=@id",
+    new { name = "Ikura", id = 115 });
+```
 
 ### 获取类型实例
 
 现在不指定Mapper就可以直接进行对象查询了。
-
-    Product product = Db.Northwind.Get<Product>("SELECT * FROM Products WHERE ProductID=115");
-    IList<Product> products = Db.Northwind.List<Product>("SELECT * FROM Products");
-    IList<DateTime> orderDates = Db.Northwind.List<DateTime>("SELECT OrderDate FROM Orders");
+```csharp
+Product product = Db.Northwind.Get<Product>("SELECT * FROM Products WHERE ProductID=115");
+IList<Product> products = Db.Northwind.List<Product>("SELECT * FROM Products");
+IList<DateTime> orderDates = Db.Northwind.List<DateTime>("SELECT OrderDate FROM Orders");
+```
 
 在这些方法内部，会在运行时动态生成对应的Mapper，并且生成一次以后，信息会被缓存下来，不需要每次都重新创建。当然，因为做了更多的是事情，它还是会比非扩展的原生版本慢那么一点点。
 
 也可以使用匿名对象作为实体模板，在许多场景尤其是处理包含少量字段（但又多于1个）时尤其方便。
-
-    var template = new { ProductID = 0, ProductName = string.Empty };
-    var productsByTemplate = Db.Northwind.TemplateList(template, "SELECT * FROM Products");
+```csharp
+var template = new { ProductID = 0, ProductName = string.Empty };
+var productsByTemplate = Db.Northwind.TemplateList(template, "SELECT * FROM Products");
+```
 
 ### 关于字段名称的匹配
 
@@ -271,16 +282,18 @@
 在`IndexingExtension`类中，定义了另外一套`IDbClient`的扩展方法，能够基于索引访问传入的参数。
 
 记得`string.Format`方法吗：
-
-    string.Format("My name is {0}, I'm {1} years old.", "John Doe", 8);
+```csharp
+string.Format("My name is {0}, I'm {1} years old.", "John Doe", 8);
+```
 
 类似的，这些扩展方法用起来是这个样子的：
+```csharp
+DataTable dt = Db.Northwind.IxDataTable(
+    "SELECT * FROM Products WHERE ProductName=@0 OR ProductID=@1", "Ikura", 115);
 
-    DataTable dt = Db.Northwind.IxDataTable(
-        "SELECT * FROM Products WHERE ProductName=@0 OR ProductID=@1", "Ikura", 115);
-
-    IList<Product> products = Db.Northwind.IxList<Product>(
-        "SELECT * FROM Products WHERE ProductID IN (@0, @1)", 15, 16);
+IList<Product> products = Db.Northwind.IxList<Product>(
+    "SELECT * FROM Products WHERE ProductID IN (@0, @1)", 15, 16);
+```
 
 为了避免同`ObjectiveExtension`中的方法歧义，这套扩展方法均在方法名称前增加了“Ix”前缀。
 
@@ -292,28 +305,29 @@
 类似 Dapper，我们使用相同的思路处理 AnsiString 的问题。有关问题可参考 [这里](https://lowleveldesign.org/2013/05/16/be-careful-with-varchars-in-dapper/)。
 
 为了传递 AnsiString，我们有下面的几种方法：
+```csharp
+var db = Db.Northwind;
+var sql = "SELECT @value";
 
-    var db = Db.Northwind;
-    var sql = "SELECT @value";
+// 直接传递 DbParameter 实例。
+var param = db.CreateParameter();
+param.ParameterName = "value";
+param.Value = "non-unicode string";
+param.DbType = DbType.AnsiString;
+param.Size = 50;
+db.Execute(sql, param);
 
-    // 直接传递 DbParameter 实例。
-    var param = db.CreateParameter();
-    param.ParameterName = "value";
-    param.Value = "non-unicode string";
-    param.DbType = DbType.AnsiString;
-    param.Size = 50;
-    db.Execute(sql, param);
+// 也可以利用 DbClientParamEx 类中对应 CreateParameter() 扩展方法快速创建 DbParameter。
+param = db.CreateParameter("value", DbType.AnsiString, "non-unicode string");
+db.Execute(sql, param);
 
-    // 也可以利用 DbClientParamEx 类中对应 CreateParameter() 扩展方法快速创建 DbParameter。
-    param = db.CreateParameter("value", DbType.AnsiString, "non-unicode string");
-    db.Execute(sql, param);
+// 使用 DbString 类（没错，长得和 Dapper 一样）。
+db.Execute(sql, new { value = new DbString { Value = "non-unicode string", IsAnsi = true } });
+db.IxExecute("SELECT @0", new DbString { Value = "non-unicode string", IsAnsi = true });
 
-    // 使用 DbString 类（没错，长得和 Dapper 一样）。
-    db.Execute(sql, new { value = new DbString { Value = "non-unicode string", IsAnsi = true } });
-    db.IxExecute("SELECT @0", new DbString { Value = "non-unicode string", IsAnsi = true });
-
-    // 利用 DbClientParamEx 类中 AnsiString() 扩展方法快速创建 DbString。
-    db.Execute(sql, new { value = "non-unicode string".AnsiString() });
+// 利用 DbClientParamEx 类中 AnsiString() 扩展方法快速创建 DbString。
+db.Execute(sql, new { value = "non-unicode string".AnsiString() });
+```
 
 显然，AnsiString() 扩展方法是使用起来最简单便捷的。
 
@@ -321,12 +335,13 @@
 ## 异步方法
 
 .net4.6版的所有数据库操作API均有对应的异步版本，它们具有与非异步版本相同的参数表，方法末尾增加“Async”，并返回`Task`或`Task<T>`，可以在 async/await 上下文中使用：
-    
-    string productName = (string)await Db.Northwind.ScalarAsync(
-        "SELECT ProductName FROM Products WHERE ProductID=115");
+```csharp
+string productName = (string)await Db.Northwind.ScalarAsync(
+    "SELECT ProductName FROM Products WHERE ProductID=115");
 
-    // Indexing 扩展方法
-    IList<Product> products = await Db.Northwind.IxListAsync<Product>(
-        "SELECT * FROM Products WHERE ProductID IN (@0, @1)", 15, 16);
+// Indexing 扩展方法
+IList<Product> products = await Db.Northwind.IxListAsync<Product>(
+    "SELECT * FROM Products WHERE ProductID IN (@0, @1)", 15, 16);
+```
 
 > 注意，由于还没有找到适当的方式，目前 DataTableAsync 和 DataSetAsync 方法实际上不是异步执行的。
