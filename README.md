@@ -1,112 +1,90 @@
-简单的Ado.net数据访问客户端。
+# cmstar.Data
+
+简单的 ADO.net 数据访问客户端和轻量化 ORM 。
+- 通用的数据访问客户端。
+- 轻量化 ORM ，支持查询结果映射到对象。
+- 使用普通对象或匿名对象传参。
+- 支持异步（async/await）操作。
+
+支持的 .NET 版本：
+- .NET Framework 3.5 或更高版本。异步（async/await）操作需要 .NET Framework 4.5 。
+- 支持 .NET Standard 2 的运行时如 .NET Core 2/3 、 .NET 5/6 。
+
+依赖库：
+- [cmstar.RapidReflection](https://www.nuget.org/packages/cmstar.RapidReflection/) To emit IL for accessing type members.
 
 
-## 数据库访问入口
+## 开始使用
 
-### 获取IDbClient
+### 获取 IDbClient
 
-在开始之前，先添加一个数据库访问入口。当然，也可以使用任何你喜欢的方式来创建IDbClient（的实现类）实例。
+`IDbClient` 接口是定义了数据库访问的方法，它的默认实现是 `DbClient` 。
+要创建一个 `DbClient` ，需要找到对应数据库驱动里的 `System.Data.Common.DbProviderFactory` 实现。
+它在每个驱动里通常是单例的。
+
+下面的例子分别声明了 SQLServer 和 Mysql 的客户端，使用的都是官方驱动。
 ```csharp
+using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
+
 public static class Db
 {
-    private static readonly Dictionary<string, IDbClient> KnownClients
-        = new Dictionary<string, IDbClient>();
-
+    // SQLServer 连接到本机的 Northwind 库。
     public static IDbClient Northwind
-    {
-        get
-        {
-            return GetClient("Northwind", "server=.;database=Northwind;trusted_connection=true;");
-        }
-    }
+        => new DbClient("server=.;database=Northwind;trusted_connection=true;", SqlClientFactory.Instance);
 
-    private static IDbClient GetClient(string name, string connectionString)
-    {
-        IDbClient client;
-        if (KnownClients.TryGetValue(name, out client))
-            return client;
-
-        lock (KnownClients)
-        {
-            if (KnownClients.TryGetValue(name, out client))
-                return client;
-
-            // 创建IDbClient的实例
-            client = new SqlDbClient(connectionString);
-            KnownClients.Add(name, client);
-        }
-
-        return client;
-    }
+    // Mysql 连接到本机的 mysqltest 库。
+    public static IDbClient MysqlTest
+        => new DbClient("server=127.0.0.1;uid=test;pwd=123456;database=mysqltest", MySqlClientFactory.Instance);
 }
 ```
 
-现在，可以使用`Db.Northwind`来访问SQLServer的Northwind示例数据库了。
+现在，可以使用 `Db.Northwind` 和 `Db.MysqlTest` 访问对应的数据库了。
+类似的，可以创建访问 Oracle，Sqlite 或是其他数据库的客户端，只需要找到对应的 `DbProviderFactory` 实例即可。
 
-### 访问其他数据库
+#### 关于 MySql.Data 库的一个 bug
 
-如果要访问MySql，可以用几行代码实现一个面向MySql的`IDbClient`实现。下面以使用 MySql.Data.dll 作为MySql .net客户端提供器为例。
+官方的 MySql.Data 驱动里，曾经在部分版本（可能很旧）中出现 `MySqlClientFactory.CreateDataAdapter` 方法返回 null 的问题，
+导致 `IDbClient.GetDataTable/GetDataSet` 方法不能正常运作。我们可以通过重写次方法修复此问题：
 ```csharp
+using MySql.Data.MySqlClient;
+
 /// <summary>
-/// Mysql数据库访问客户端。
+/// 修复 MySql.Data 库可能在<see cref="DbProviderFactory.CreateDataAdapter"/>返回 null 的问题。
 /// </summary>
-public class MysqlDbClient : AbstractDbClient
+public class FixedMySqlClientFactory : DbProviderFactoryWrapper
 {
-    private readonly string _connectionString;
+    public static readonly FixedMySqlClientFactory Instance = new FixedMySqlClientFactory();
 
-    /// <summary>
-    /// 使用指定的数据库类型和连接字符串初始化<see cref="SqlDbClient"/>的新实例。
-    /// </summary>
-    /// <param name="connectionString">连接字符串。</param>
-    public MysqlDbClient(string connectionString)
+    private FixedMySqlClientFactory() : base(MySqlClientFactory.Instance) { }
+
+    public override DbDataAdapter CreateDataAdapter()
     {
-        ArgAssert.NotNullOrEmptyOrWhitespace(connectionString, "connectionString");
-        _connectionString = connectionString;
-    }
-
-    /// <summary>
-    /// 获取当前实例所使用的数据库连接字符串。
-    /// </summary>
-    public override string ConnectionString
-    {
-        get { return _connectionString; }
-    }
-
-    /// <summary>
-    /// 获取当前实例所使用的<see cref="DbProviderFactory"/>实例。
-    /// </summary>
-    protected override DbProviderFactory Factory => FixedMySqlClientFactory.Instance;
-
-    /// <summary>
-    /// 在 MySql.Data 库的早期版本有重写<see cref="DbProviderFactory.CreateDataAdapter"/>，
-    /// 但之后又移除了（坑……），我们需要重写此方法，否则使用后期版本的库将返回null。
-    /// </summary>
-    private class FixedMySqlClientFactory : DbProviderFactoryWrapper
-    {
-        public static readonly FixedMySqlClientFactory Instance = new FixedMySqlClientFactory();
-
-        private FixedMySqlClientFactory() : base(MySqlClientFactory.Instance)
-        {
-        }
-
-        public override DbDataAdapter CreateDataAdapter()
-        {
-            return new MySqlDataAdapter();
-        }
+        return base.CreateDataAdapter() ?? new MySqlDataAdapter();
     }
 }
 ```
 
-现在可以创建MySql的访问客户端了：
-```csharp
-IDbClient client = new MysqlDbClient("server=.;database=MySqlDb;uid=user;pwd=password");
-```
+使用时，不直接使用 `MySqlClientFactory.Instance` 而是改用 `FixedMySqlClientFactory.Instance` 。
 
-类似的，可以创建访问Oracle，Sqlite或是其他数据库的客户端，只需要找到对应的`DbProviderFactory`实例即可。
 
-## 基本数据库操作
+## 数据库操作
 
-### 基础CRUD
+数据库操作分布在三部分：
+- `IDbClient` 是数据库的基础操作，不包含 ORM 部分。
+- [`ObjectiveExtension`](#ObjectiveExtension扩展) 定义了 `IDbClient` 的扩展方法，提供轻量化 ORM ，支持使用对象（含匿名对象）传递参数。
+- [`IndexingExtension`](#IndexingExtension扩展) 定义了 `IDbClient` 的扩展方法，支持以索引的方法传递参数。
+
+
+
+### 基础 CRUD
+
+下面演示 `IDbClient` 的基本用法。
+
+前文已经声明了 Northwind 数据库，它是 SQLServer 的示例库，可以从
+[这里](https://github.com/Microsoft/sql-server-samples/tree/master/samples/databases/northwind-pubs) 
+下载创建库、表和数据的脚本 `instnwnd.sql` 。
+
 ```csharp
 // 查询
 string productName = (string)Db.Northwind.Scalar(
@@ -144,7 +122,12 @@ foreach (IDataRecord row in rows)
 }
 ```
 
-### 使用参数和调用存储过程
+#### 使用参数和调用存储过程
+
+这里演示基于 `IDbClient` 接口方法创建和使用参数、调用存储过程。
+
+在实际使用中，通常使用下文的 `ObjectiveExtension扩展` 或 `IndexingExtension扩展`，避免繁琐的操作。
+
 ```csharp
 // 使用参数
 DbParameter parameter = Db.Northwind.CreateParameter();
@@ -157,7 +140,7 @@ parameter.Direction = ParameterDirection.Input;
 DataSet ds = Db.Northwind.DataSet(
     "CustOrderHist", new[] { parameter }, CommandType.StoredProcedure);
 
-// 使用DbClientParamEx中的扩展方法快速创建参数（需要using Data命名空间）
+// 使用DbClientParamEx中的扩展方法快速创建参数（需要 using cmstar.Data 命名空间）
 DbParameter[] parameters = new[] 
 {
     Db.Northwind.CreateParameter("id", DbType.Int32, 115, direction: ParameterDirection.Input),
@@ -166,9 +149,10 @@ DbParameter[] parameters = new[]
 Db.Northwind.DataSet("SELECT * FROM Products WHERE ProductName=@name OR ProductID=@id", parameters);
 ```
 
-### 使用Mapper
+#### 使用Mapper
 
 `IMapper<T>`接口定义了从`IDataRecord`到`T`类型的映射，可以用过实现该接口，以便从数据库读取并创建特定类型实例及实例的集合。
+
 ```csharp
 public class Product
 {
@@ -200,7 +184,7 @@ IList<Product> products = Db.Northwind.List(new ProductMapper(), "SELECT * FROM 
 
 `Mappers`类中已经定义了部分简单类型的Mapper实现，以便实现便捷的查询。
 ```csharp
-// 使用已定义好的简单Mapper
+// 使用已定义好的简单 Mapper
 IList<string> productNames = Db.Northwind.List(
     Mappers.String(), "SELECT ProductName FROM Products");
 
@@ -229,7 +213,7 @@ using (ITransactionKeeper tran = Db.Northwind.CreateTransaction())
 }
 ```
 
-## ObjectiveExtension扩展方法
+## ObjectiveExtension扩展
 
 在`ObjectiveExtension`类中，定义了一套`IDbClient`的扩展方法，能够使用更快捷的方式进行数据库操作。
 
@@ -277,7 +261,7 @@ var productsByTemplate = Db.Northwind.TemplateList(template, "SELECT * FROM Prod
 *注意：使用匿名对象作为模板查询时，匿名对象的字段名称需和查询结果的字段名称完全匹配，不支持模糊匹配。*
 
 
-## IndexingExtension扩展方法
+## IndexingExtension扩展
 
 在`IndexingExtension`类中，定义了另外一套`IDbClient`的扩展方法，能够基于索引访问传入的参数。
 
@@ -334,7 +318,7 @@ db.Execute(sql, new { value = "non-unicode string".AnsiString() });
 
 ## 异步方法
 
-.net4.6版的所有数据库操作API均有对应的异步版本，它们具有与非异步版本相同的参数表，方法末尾增加“Async”，并返回`Task`或`Task<T>`，可以在 async/await 上下文中使用：
+.net4.5版的所有数据库操作API均有对应的异步版本，它们具有与非异步版本相同的参数表，方法末尾增加“Async”，并返回`Task`或`Task<T>`，可以在 async/await 上下文中使用：
 ```csharp
 string productName = (string)await Db.Northwind.ScalarAsync(
     "SELECT ProductName FROM Products WHERE ProductID=115");
