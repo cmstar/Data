@@ -7,6 +7,20 @@
     <AssemblyName>cmstar.Data</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>1591;1701;1702;3021</NoWarn>
+
+    <!--Package information-->
+    <PackageId>cmstar.Data</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Eric Ruan</Authors>
+    <Description>A simple database client and object mapper.</Description>
+    <Copyright>Copyright © Eric Ruan 2014</Copyright>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/cmstar/Data.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/cmstar/Data</PackageProjectUrl>
+    <PackageTags>database sql ado-net orm ormlite</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <!--Include .pdb-->
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
   <!--Compiling contants-->
