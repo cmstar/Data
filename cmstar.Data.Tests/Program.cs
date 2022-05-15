@@ -53,7 +53,7 @@ namespace cmstar.Data
             const int id = 6;
             using (var tran = Db.Northwind.CreateTransaction())
             {
-                
+
                 log($"Before update: {await tran.IxScalarAsync("SELECT UnitsInStock FROM Products WHERE ProductID=7", id)}");
 
                 await tran.IxExecuteAsync(
@@ -200,11 +200,34 @@ namespace cmstar.Data
             = new ConcurrentDictionary<string, IDbClient>();
 
         public static IDbClient Northwind
-            => GetClient("Northwind", "server=.;database=Northwind;trusted_connection=true;");
+            => GetSqlClient("Northwind", "server=.;database=Northwind;trusted_connection=true;");
 
-        private static IDbClient GetClient(string name, string connectionString)
+        private static IDbClient GetSqlClient(string name, string connectionString)
         {
-            return KnownClients.GetOrAdd(name, _ => new SqlDbClient(connectionString));
+            var factory = System.Data.SqlClient.SqlClientFactory.Instance;
+            return KnownClients.GetOrAdd(name, _ => new DbClient(connectionString, factory));
+        }
+
+        private static IDbClient GetMysqlClient(string name, string connectionString)
+        {
+            var factory = new FixedMySqlClientFactory();
+            return KnownClients.GetOrAdd(name, _ => new DbClient(connectionString, factory));
+        }
+
+        /// <summary>
+        /// 在 MySql.Data 库的早期版本有重写<see cref="DbProviderFactory.CreateDataAdapter"/>，
+        /// 但之后又移除了（坑……），我们需要重写此方法，否则使用后期版本的库将返回null。
+        /// </summary>
+        private class FixedMySqlClientFactory : DbProviderFactoryWrapper
+        {
+            public FixedMySqlClientFactory() : base(MySql.Data.MySqlClient.MySqlClientFactory.Instance)
+            {
+            }
+
+            public override DbDataAdapter CreateDataAdapter()
+            {
+                return new MySql.Data.MySqlClient.MySqlDataAdapter();
+            }
         }
     }
 }

@@ -29,6 +29,7 @@
   <ItemGroup>
     <PackageReference Include="cmstar.RapidReflection" Version="1.0.0" />
   </ItemGroup>
+
   <!--net46-->
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
     <Reference Include="System.Transactions" />
@@ -44,7 +45,6 @@
 
   <!--netstandard2.0-->
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Data.SqlClient" Version="4.7.0" />
     <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
   </ItemGroup>
