@@ -26,6 +26,9 @@
     <DefineConstants>NET35</DefineConstants>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="cmstar.RapidReflection" Version="1.0.0" />
+  </ItemGroup>
   <!--net46-->
   <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
     <Reference Include="System.Transactions" />

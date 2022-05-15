@@ -2,12 +2,12 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace cmstar.Data.Reflection
+namespace cmstar.Data
 {
     /// <summary>
     /// 包含类型反射判断相关的方法。
     /// </summary>
-    public static class ReflectionUtils
+    internal static class ReflectionUtils
     {
         /// <summary>
         /// 判断给定类型是否可被赋值为null。

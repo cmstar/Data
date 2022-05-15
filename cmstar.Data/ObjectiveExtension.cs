@@ -5,7 +5,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using cmstar.Data.Reflection.Emit;
+using cmstar.RapidReflection.Emit;
 using cmstar.Data.Dynamic;
 
 namespace cmstar.Data
