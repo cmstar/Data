@@ -1,5 +1,7 @@
 # cmstar.Data
 
+[![NuGet](https://img.shields.io/nuget/v/cmstar.Data.svg)](https://www.nuget.org/packages/cmstar.Data/)
+
 简单的 ADO.net 数据访问客户端和轻量化 ORM 。
 - 通用的数据访问客户端。
 - 轻量化 ORM ，支持查询结果映射到对象。
@@ -16,7 +18,19 @@
 
 ## 开始使用
 
-### 获取 IDbClient
+### 安装
+
+通过 Package Manager:
+```
+Install-Package cmstar.Data
+```
+
+或通过 dotnet-cli:
+```
+dotnet add package cmstar.Data
+```
+
+### 数据库入口
 
 `IDbClient` 接口是定义了数据库访问的方法，它的默认实现是 `DbClient` 。
 要创建一个 `DbClient` ，需要找到对应数据库驱动里的 `System.Data.Common.DbProviderFactory` 实现。
