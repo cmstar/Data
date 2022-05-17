@@ -35,7 +35,7 @@ namespace cmstar.Data.Dynamic
             {
                 Lock.EnterReadLock();
                 CommandCacheItem cache;
-                
+
                 // we suppose in more situations G1 is enough for use,
                 // so search from G1 before G2 will be more quickly
                 if (!Generation1.TryGetValue(identity, out cache))
@@ -90,8 +90,9 @@ namespace cmstar.Data.Dynamic
 
             foreach (var item in Generation1)
             {
+                // A same cache may appear in G1 again. So don't use Add().
                 if (item.Value.Reused != 0)
-                    _generation2.Add(item.Key, item.Value);
+                    _generation2[item.Key] = item.Value;
             }
 
             Generation1.Clear();

@@ -10,7 +10,7 @@
 
     <!--Package information-->
     <PackageId>cmstar.Data</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Eric Ruan</Authors>
     <Description>A simple database client and object mapper.</Description>
     <Copyright>Copyright © Eric Ruan 2014</Copyright>
