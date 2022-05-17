@@ -17,7 +17,7 @@ namespace cmstar.Data.Dynamic
         /// <summary>
         /// A function returns a series of <see cref="DbParameter"/>.
         /// The function accepts an instance of <see cref="IDbClient"/> as the first parameter,
-        /// the sencond is an object which keeps the values of parameters for the <see cref="DbCommand"/>.
+        /// the second is an object which keeps the values of parameters for the <see cref="DbCommand"/>.
         /// </summary>
         public Func<IDbClient, object, IEnumerable<DbParameter>> Params;
 
@@ -27,7 +27,7 @@ namespace cmstar.Data.Dynamic
         public object Mapper;
 
         /// <summary>
-        /// A counter specifies how many times this cahce item is reused.
+        /// A counter specifies how many times this cache item is reused.
         /// </summary>
         public int Reused;
     }

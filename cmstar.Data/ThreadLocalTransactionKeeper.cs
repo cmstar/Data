@@ -34,7 +34,7 @@ namespace cmstar.Data
         private bool _disposed;
 
         // 事务的嵌套层级。
-        // ITransactionKeeper 接口继承了 IDbClient，所以具有 CreateTrasaction 方法。
+        // ITransactionKeeper 接口继承了 IDbClient，所以具有 CreateTransaction 方法。
         // 刚创建的事务潜逃层级为0，事务内再次创建事务时+1，并返回（复用）当前实例。
         private int _embeddedLevel;
 

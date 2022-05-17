@@ -7,7 +7,7 @@ namespace cmstar.Data.Dynamic
 {
     /// <summary>
     /// A mapper that maps data from a <see cref="IDataRecord"/> to
-    /// anonymouse objects with the specified type.
+    /// anonymous objects with the specified type.
     /// </summary>
     /// <typeparam name="T">The type which the data is mapped to.</typeparam>
     internal class AnonymousObjectMapper<T> : IMapper<T>

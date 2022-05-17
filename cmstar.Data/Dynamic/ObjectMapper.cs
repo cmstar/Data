@@ -180,7 +180,7 @@ namespace cmstar.Data.Dynamic
         }
 
         // Scan the template record with an array of flags in which true means the field at the
-        // corresbonding index has already been used by a MemberSetupInfo and should be ingored.
+        // corresponding index has already been used by a MemberSetupInfo and should be ignored.
         // Then, find a member with a matched name and setup.
         private static void AppendMemberSetups(
             List<MemberSetupInfo> memberSetups, IDataRecord template, bool[] flags,

@@ -4,15 +4,15 @@ using System.Threading;
 namespace cmstar.Data.Dynamic
 {
     /// <summary>
-    /// Caches the infomation for commands to run.
+    /// Caches the information for commands to run.
     /// </summary>
     internal static class CommandCache
     {
         /*
-         * The cache is devided into 2 generations.
-         * G1(cache generation 1) keeps all cahce items newly added.
+         * The cache is divided into 2 generations.
+         * G1(cache generation 1) keeps all cache items newly added.
          * G2 keeps items that are not removed from G1 after a cache collection.
-         * G2 will not work util the first cache colleciton comes up.
+         * G2 will not work util the first cache collection comes up.
          */
         private const int Generation1Threshold = 5000;
 
@@ -25,7 +25,7 @@ namespace cmstar.Data.Dynamic
 
         /// <summary>
         /// Gets the <see cref="CommandCacheItem"/> from the cache.
-        /// Returns <c>null</c> if the corresbonding item does not exist.
+        /// Returns <c>null</c> if the corresponding item does not exist.
         /// </summary>
         /// <param name="identity">The identity for retrieving the cache.</param>
         /// <returns>The <see cref="CommandCacheItem"/> or <c>null</c>.</returns>

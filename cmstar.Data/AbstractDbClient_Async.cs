@@ -193,7 +193,7 @@ namespace cmstar.Data
                 cmd = CreateCommand(sql, connection, parameters, commandType, timeout);
 
                 // TODO 目前还没有找到适当的异步填充 DataSet 的方法，填充部分目前以非异步方式执行。
-                // 主要因为 DbDataAdaper 没有提供异步的方法，而如何从 IDataReader 获得 DataSet还没搞清楚。
+                // 主要因为 DbDataAdapter 没有提供异步的方法，而如何从 IDataReader 获得 DataSet还没搞清楚。
                 return FillDataSet(cmd);
             }
             catch (Exception ex)
